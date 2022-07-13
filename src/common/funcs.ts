@@ -127,19 +127,12 @@ export async function drawCal(
   // create basic table structure
   var text = ""; // initialize accumulative variable to empty string
   text += "<TABLE>"; // table settings
-  text += '<TH COLSPAN=7 class="calendar-title">'; // create table header cell
-  text += `<span>
-    <span class="calendar-nav">
-      <a class="">&lt;</a>
-      <a class="">Today</a>
-      <a class="">&gt;</a>
-    </span>
-    <span class="calendar-month-year">
-    <strong class="calendar-month">${monthName}</strong> <strong class="calendar-year">${year}</strong>
-    </span>
-  </span>`;
-  text += "</FONT>"; // close table header's font settings
-  text += "</TH>"; // close header cell
+  text += '<TH COLSPAN=3 class="calendar-title">'; // create table header cell
+  text += `<strong class="calendar-month">${monthName}</strong> <strong class="calendar-year">${year}</strong>`;
+  text += '</TH><th COLSPAN=4 class="calendar-nav">'; // close header cell
+
+  text += `<a class="">&lt;</a> <a class="">Today</a> <a class="">&gt;</a>`;
+  text += "</th>";
 
   // variables to hold constant settings
   var openCol = "<TD>";

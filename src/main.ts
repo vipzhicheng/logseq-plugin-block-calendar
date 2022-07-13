@@ -84,13 +84,11 @@ const main = async () => {
       font-weight: bold;
       color: blue;
     }
-    #logseq-plugin-block-calendar--block-calendar .calendar-month-year {
-      float: left;
-    }
+
     #logseq-plugin-block-calendar--block-calendar .calendar-nav {
-      float: right;
+      text-align: right;
       font-size: 14px;
-      font-weight: normal;
+      font-weight: bold;
     }
     `,
   });
