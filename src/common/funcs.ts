@@ -73,24 +73,29 @@ async function getMonthName(month: number) {
   return ar[month];
 }
 
-export async function setCal() {
+export async function setCal(year4: number, month0: number, slot: string) {
   // standard time attributes
   const now = new Date();
-  let year = now.getFullYear();
-  if (year < 1000) year += 1900;
-  const month = now.getMonth();
-  const monthName = await getMonthName(month);
+  const monthName = await getMonthName(month0);
   const date = now.getDate();
 
   // create instance of first day of month, and extract the day on which it occurs
-  const firstDayInstance = new Date(year, month, 1);
+  const firstDayInstance = new Date(year4, month0, 1);
   const firstDay = firstDayInstance.getDay();
 
   // number of days in current month
-  var days = getDays(month, year);
+  var days = getDays(month0, year4);
 
   // call function to draw calendar
-  return await drawCal(firstDay + 1, days, date, month, monthName, year);
+  return await drawCal(
+    firstDay + 1,
+    days,
+    date,
+    month0,
+    monthName,
+    year4,
+    slot
+  );
 }
 
 const getLang = async () => {
@@ -112,26 +117,41 @@ export async function drawCal(
   date: number,
   month: number,
   monthName: string,
-  year: number
+  year: number,
+  slot: string
 ) {
-  console.log({
-    firstDay,
-    lastDate,
-    date,
-    month,
-    monthName,
-    year,
-  });
+  const now = new Date();
   const lang = await getLang();
   const config = await logseq.App.getUserConfigs();
+
+  let previousMonth = month - 1;
+  let previousMonthYear = year;
+  if (previousMonth < 0) {
+    previousMonth = previousMonth + 12;
+    previousMonthYear--;
+  }
+
+  let nextMonth = month + 1;
+  let nextMonthYear = year;
+  if (nextMonth > 11) {
+    nextMonth = nextMonth - 12;
+    nextMonthYear++;
+  }
+
   // create basic table structure
   var text = ""; // initialize accumulative variable to empty string
   text += "<TABLE>"; // table settings
-  text += '<TH COLSPAN=3 class="calendar-title">'; // create table header cell
+  text += '<TH COLSPAN=5 class="calendar-title">'; // create table header cell
   text += `<strong class="calendar-month">${monthName}</strong> <strong class="calendar-year">${year}</strong>`;
-  text += '</TH><th COLSPAN=4 class="calendar-nav">'; // close header cell
+  text += '</TH><th COLSPAN=2 class="calendar-nav">'; // close header cell
 
-  text += `<a class="">&lt;</a> <a class="">Today</a> <a class="">&gt;</a>`;
+  text += `<a class="" data-year="${previousMonthYear}" data-month="${
+    previousMonth + 1
+  }" data-slot="${slot}" data-on-click="loadCalendar" title="Jump to previous month.">&lt;</a> <a class="" data-year="${now.getFullYear()}" data-month="${
+    now.getMonth() + 1
+  }" data-slot="${slot}" data-on-click="loadCalendar" title="Jump back to current month.">Today</a> <a class="" data-year="${nextMonthYear}" data-month="${
+    nextMonth + 1
+  }" data-slot="${slot}" data-on-click="loadCalendar" title="Jump to next month">&gt;</a>`;
   text += "</th>";
 
   // variables to hold constant settings
@@ -180,10 +200,6 @@ export async function drawCal(
 
       // @ts-ignore
       if (curCell < (firstDayOfWeek === "sunday" ? firstDay : firstDay - 1)) {
-        console.log({
-          curCell,
-          firstDay,
-        });
         text += "<TD></TD>";
         curCell++;
       } else {
@@ -194,7 +210,11 @@ export async function drawCal(
         text +=
           "<TD>" +
           `<a class="button ${
-            date === digit ? "calendar-td-today" : ""
+            date === digit &&
+            year === now.getFullYear() &&
+            month === now.getMonth()
+              ? "calendar-td-today"
+              : ""
           }" data-type="day" data-value="${journalTitle}" data-on-click="processJump">${digit}</a>` +
           "</TD>";
         digit++;
