@@ -90,6 +90,10 @@ const main = async () => {
       font-size: 14px;
       font-weight: bold;
     }
+    #logseq-plugin-block-calendar--block-calendar .calendar-nav a {
+      color: #999;
+
+    }
     `,
   });
 };
