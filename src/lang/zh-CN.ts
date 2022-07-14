@@ -21,4 +21,6 @@ export default {
   Thursday: "周四",
   Friday: "周五",
   Saturday: "周六",
+
+  Today: "今天",
 };

@@ -21,4 +21,6 @@ export default {
   Thursday: "Thu",
   Friday: "Fri",
   Saturday: "Sat",
+
+  Today: "Today",
 };

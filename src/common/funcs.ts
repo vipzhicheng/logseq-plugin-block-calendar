@@ -1,28 +1,10 @@
 import "@logseq/libs";
 import { format } from "date-fns";
-
+import dayjs from "dayjs";
+import isToday from "dayjs/plugin/isToday";
 import langs from "../lang";
-// ref: http://www.javascriptkit.com/script/cut20.shtml
-function getTime() {
-  // initialize time-related variables with current time settings
-  let now = new Date();
-  let hour = now.getHours();
-  let minute = now.getMinutes();
-  let ampm = "";
 
-  // validate hour values and set value of ampm
-  if (hour >= 12) {
-    hour -= 12;
-    ampm = "PM";
-  } else ampm = "AM";
-  hour = hour == 0 ? 12 : hour;
-
-  // add zero digit to a one digit minute
-  if (minute < 10) minute = Number("0" + minute); // do not parse this number!
-
-  // return time string
-  return hour + ":" + minute + " " + ampm;
-}
+dayjs.extend(isToday);
 
 function leapYear(year: number) {
   if (year % 4 == 0)
@@ -34,7 +16,7 @@ function leapYear(year: number) {
 
 function getDays(month: number, year: number) {
   // create array to hold number of days in each month
-  var ar = new Array(12);
+  const ar = new Array(12);
   ar[0] = 31; // January
   ar[1] = leapYear(year) ? 29 : 28; // February
   ar[2] = 31; // March
@@ -52,10 +34,9 @@ function getDays(month: number, year: number) {
   return ar[month];
 }
 
-async function getMonthName(month: number) {
-  const lang = await getLang();
+async function getMonthName(month: number, lang: any) {
   // create array to hold name of each month
-  var ar = new Array(12);
+  const ar = new Array(12);
   ar[0] = lang.January;
   ar[1] = lang.February;
   ar[2] = lang.March;
@@ -73,18 +54,24 @@ async function getMonthName(month: number) {
   return ar[month];
 }
 
-export async function setCal(year4: number, month0: number, slot: string) {
-  // standard time attributes
+export async function setCal(
+  year4: number,
+  month0: number,
+  slot: string,
+  language: string,
+  options: string[]
+) {
+  clearJournalDays();
+  const lang = await getLang(language);
   const now = new Date();
-  const monthName = await getMonthName(month0);
+  const monthName = await getMonthName(month0, lang);
   const date = now.getDate();
-
   // create instance of first day of month, and extract the day on which it occurs
   const firstDayInstance = new Date(year4, month0, 1);
   const firstDay = firstDayInstance.getDay();
 
   // number of days in current month
-  var days = getDays(month0, year4);
+  const days = getDays(month0, year4);
 
   // call function to draw calendar
   return await drawCal(
@@ -94,22 +81,54 @@ export async function setCal(year4: number, month0: number, slot: string) {
     month0,
     monthName,
     year4,
-    slot
+    slot,
+    lang,
+    language,
+    options
   );
 }
 
-const getLang = async () => {
+const getLang = async (language: string) => {
   const config = await logseq.App.getUserConfigs();
+  language = language || config.preferredLanguage;
 
   type Lang = keyof typeof langs;
-  const lang: Lang = (
-    ["zh-CN"].includes(config.preferredLanguage)
-      ? config.preferredLanguage
-      : "en"
-  ) as Lang;
+  const lang: Lang = (["zh-CN"].includes(language) ? language : "en") as Lang;
 
   return langs[lang];
 };
+
+let journalDays: number[] = [];
+async function getJournalDays(year: number, month: number) {
+  if (journalDays.length === 0) {
+    const journals = await _getCurrentRepoRangeJournals(year, month + 1);
+    const journalsReduce = journals.reduce((ac: any, it: any) => {
+      const k = it[`journal-day`].toString();
+      ac[k] = it;
+      return ac;
+    }, {});
+
+    journalDays = Object.keys(journalsReduce)
+      .map((it: any) => {
+        const d = dayjs(journalsReduce[it][`journal-day`].toString());
+        if (d.isValid() && !d.isToday()) {
+          return d.date();
+        }
+        return 0;
+      })
+      .filter((it) => it > 0);
+  }
+
+  return journalDays;
+}
+
+export function clearJournalDays() {
+  journalDays = [];
+}
+
+logseq.App.onCurrentGraphChanged(() => {
+  clearJournalDays();
+});
 
 export async function drawCal(
   firstDay: number,
@@ -118,11 +137,16 @@ export async function drawCal(
   month: number,
   monthName: string,
   year: number,
-  slot: string
+  slot: string,
+  lang: any,
+  language: string,
+  options: string[]
 ) {
   const now = new Date();
-  const lang = await getLang();
+
   const config = await logseq.App.getUserConfigs();
+
+  const journalDays = await getJournalDays(year, month);
 
   let previousMonth = month - 1;
   let previousMonthYear = year;
@@ -139,29 +163,48 @@ export async function drawCal(
   }
 
   // create basic table structure
-  var text = ""; // initialize accumulative variable to empty string
-  text += "<TABLE>"; // table settings
-  text += '<TH COLSPAN=5 class="calendar-title">'; // create table header cell
-  text += `<strong class="calendar-month">${monthName}</strong> <strong class="calendar-year">${year}</strong>`;
-  text += '</TH><th COLSPAN=2 class="calendar-nav">'; // close header cell
+  let text = ""; // initialize accumulative variable to empty string
+  text += '<table class="logseq-block-calendar">'; // table settings
 
-  text += `<a class="" data-year="${previousMonthYear}" data-month="${
-    previousMonth + 1
-  }" data-slot="${slot}" data-on-click="loadCalendar" title="Jump to previous month.">&lt;</a> <a class="" data-year="${now.getFullYear()}" data-month="${
-    now.getMonth() + 1
-  }" data-slot="${slot}" data-on-click="loadCalendar" title="Jump back to current month.">Today</a> <a class="" data-year="${nextMonthYear}" data-month="${
-    nextMonth + 1
-  }" data-slot="${slot}" data-on-click="loadCalendar" title="Jump to next month">&gt;</a>`;
-  text += "</th>";
+  if (!options.includes("nohead")) {
+    if (!options.includes("nonav")) {
+      text += '<th COLSPAN=5 class="calendar-title">'; // create table header cell
+      text += `<strong class="calendar-month">${monthName}</strong> <strong class="calendar-year">${year}</strong>`;
+      text += "</th>";
+
+      text += '<th COLSPAN=2 class="calendar-nav">'; // close header cell
+
+      text += `<a class="" data-year="${previousMonthYear}" data-month="${
+        previousMonth + 1
+      }" data-slot="${slot}" data-language="${language}" data-options="${options.join(
+        " "
+      )}" data-on-click="loadCalendar" title="Jump to previous month.">&lt;</a> <a class="" data-year="${now.getFullYear()}" data-month="${
+        now.getMonth() + 1
+      }" data-slot="${slot}" data-language="${language}" data-options="${options.join(
+        " "
+      )}" data-on-click="loadCalendar" title="Jump back to current month.">${
+        lang.Today
+      }</a> <a class="" data-year="${nextMonthYear}" data-month="${
+        nextMonth + 1
+      }" data-slot="${slot}" data-language="${language}" data-options="${options.join(
+        " "
+      )}" data-on-click="loadCalendar" title="Jump to next month">&gt;</a>`;
+      text += "</th>";
+    } else {
+      text += '<th COLSPAN=7 class="calendar-title">'; // create table header cell
+      text += `<strong class="calendar-month">${monthName}</strong> <strong class="calendar-year">${year}</strong>`;
+      text += "</th>";
+    }
+  }
 
   // variables to hold constant settings
-  var openCol = "<TD>";
-  var closeCol = "</TD>";
+  const openCol = "<td>";
+  const closeCol = "</td>";
 
   // create array of abbreviated day names
-  var weekDay = new Array(7);
+  const weekDay = new Array(7);
 
-  const firstDayOfWeek = "monday";
+  const firstDayOfWeek = logseq.settings?.firstDayOfWeek || "sunday";
 
   // @ts-ignore
   if (firstDayOfWeek === "sunday") {
@@ -183,24 +226,24 @@ export async function drawCal(
   }
 
   // create first row of table to set column width and specify week day
-  text += '<TR class="calendar-head" ALIGN="center" VALIGN="center">';
-  for (var dayNum = 0; dayNum < 7; ++dayNum) {
+  text += '<tr class="calendar-head" align="center" valign="center">';
+  for (let dayNum = 0; dayNum < 7; ++dayNum) {
     text += openCol + weekDay[dayNum] + closeCol;
   }
-  text += "</TR>";
+  text += "</tr>";
 
   // declaration and initialization of two variables to help with tables
-  var digit = 1;
-  var curCell = 1;
+  let digit = 1;
+  let curCell = 1;
 
-  for (var row = 1; row <= Math.ceil((lastDate + firstDay - 1) / 7); ++row) {
-    text += '<TR ALIGN="center" VALIGN="top">';
-    for (var col = 1; col <= 7; ++col) {
+  for (let row = 1; row <= Math.ceil((lastDate + firstDay - 1) / 7); ++row) {
+    text += '<tr align="center" valign="top">';
+    for (let col = 1; col <= 7; ++col) {
       if (digit > lastDate) break;
 
       // @ts-ignore
       if (curCell < (firstDayOfWeek === "sunday" ? firstDay : firstDay - 1)) {
-        text += "<TD></TD>";
+        text += "<td></td>";
         curCell++;
       } else {
         const journalTitle = format(
@@ -208,7 +251,7 @@ export async function drawCal(
           config.preferredDateFormat
         );
         text +=
-          "<TD>" +
+          "<td>" +
           `<a class="button ${
             date === digit &&
             year === now.getFullYear() &&
@@ -216,15 +259,109 @@ export async function drawCal(
               ? "calendar-td-today"
               : ""
           }" data-type="day" data-value="${journalTitle}" data-on-click="processJump">${digit}</a>` +
-          "</TD>";
+          (logseq.settings?.enableDot && journalDays.includes(digit)
+            ? `<div class="calendar-dot"> </div>`
+            : "") +
+          "</td>";
         digit++;
       }
     }
-    text += "</TR>";
+    text += "</tr>";
   }
 
   // close all basic table tags
-  text += "</TABLE>";
+  text += "</table>";
 
   return text;
+}
+
+/**
+ *
+ * @see https://github.com/xyhp915/logseq-journals-calendar/blob/main/src/App.vue#L170
+ * @param year
+ * @param month
+ * @returns
+ */
+async function _getCurrentRepoRangeJournals(year: number, month: number) {
+  const my = year + (month < 10 ? "0" : "") + month;
+  let ret;
+  try {
+    ret = await logseq.DB.datascriptQuery(`
+      [:find (pull ?p [*])
+       :where
+       [?b :block/page ?p]
+       [?p :block/journal? true]
+       [?p :block/journal-day ?d]
+       [(>= ?d ${my}01)] [(<= ?d ${my}31)]]
+    `);
+  } catch (e) {
+    console.error(e);
+  }
+  return (ret || []).flat();
+}
+
+export function provideStyle(opts: any = {}) {
+  const {} = opts;
+  logseq.provideStyle({
+    key: "block-calendar",
+    style: `
+    .logseq-block-calendar {
+      width: ${logseq.settings?.tableWidth || "100%"}
+    }
+    .logseq-block-calendar tr:nth-child(even) {
+      background-color: transparent;
+    }
+    .logseq-block-calendar tr:nth-child(odd) {
+      background-color: transparent;
+    }
+    .logseq-block-calendar th {
+      border-bottom: 0;
+      font-size: 20px;
+      font-weight: bold;
+      padding-left: 4px;
+    }
+    .logseq-block-calendar td {
+      font-size: 14px;
+      padding: 0;
+      text-align: center;
+    }
+
+    .logseq-block-calendar .calendar-head {
+      font-weight: bold;
+      color: #999;
+    }
+
+    .logseq-block-calendar {
+      margin: 0;
+    }
+
+    .logseq-block-calendar a {
+      color: #000;
+    }
+
+
+    .logseq-block-calendar .calendar-td-today {
+      font-weight: bold;
+      color: blue;
+    }
+
+    .logseq-block-calendar .calendar-nav {
+      text-align: right;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    .logseq-block-calendar .calendar-nav a {
+      color: #999;
+    }
+    .logseq-block-calendar .calendar-dot {
+      background-color: red;
+      width: 4px;
+      height: 4px;
+      margin: auto;
+      margin-top: -8px;
+      margin-bottom: 4px;
+      border-radius: 2px;
+    }
+    `,
+  });
 }

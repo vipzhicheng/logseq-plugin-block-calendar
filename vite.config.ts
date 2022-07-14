@@ -1,6 +1,5 @@
 import { defineConfig } from "vite";
 
-import vue from "@vitejs/plugin-vue";
 import logseqPlugin from "vite-plugin-logseq";
 
 export default defineConfig({
@@ -9,5 +8,5 @@ export default defineConfig({
     target: "esnext",
     minify: "esbuild",
   },
-  plugins: [vue(), logseqPlugin()],
+  plugins: [logseqPlugin()],
 });
