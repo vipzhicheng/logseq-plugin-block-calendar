@@ -22,11 +22,26 @@ const defineSettings: SettingSchemaDesc[] = [
     default: "sunday",
   },
   {
+    key: "defaultLanguage",
+    type: "string",
+    title: "Language locale",
+    description: "",
+    default: "en",
+  },
+  {
     key: "tableWidth",
     type: "string",
     title: "Calendar width",
     description: "Set calendar width, default is 100%.",
     default: "100%",
+  },
+  {
+    key: "alwaysRenderIn",
+    type: "string",
+    title: "",
+    description:
+      "Always render calendar always in custom HTML element (provide CSS selector: ID or class)",
+    default: "#banner-widget-calendar",
   },
 ];
 
@@ -71,15 +86,15 @@ const main = async () => {
       }
     },
   });
+
   logseq.App.onMacroRendererSlotted(async ({ slot, payload }) => {
     let [type, year, month, lang, ...options] = payload.arguments;
-
-    const now = new Date();
-    const year4 = year ? Number(year) : now.getFullYear();
-    const month0 = month ? Number(month) - 1 : now.getMonth();
-
-    const calendar = await setCal(year4, month0, slot, lang, options);
     if (type === "block-calendar") {
+      const now = new Date();
+      const year4 = year ? Number(year) : now.getFullYear();
+      const month0 = month ? Number(month) - 1 : now.getMonth();
+
+      const calendar = await setCal(year4, month0, slot, lang, options);
       logseq.provideUI({
         key: "block-calendar-" + slot,
         slot,
@@ -89,7 +104,25 @@ const main = async () => {
     }
   });
 
+  if (logseq.settings?.alwaysRenderIn) {
+    const now = new Date();
+    const calendar = await setCal(
+      now.getFullYear(),
+      now.getMonth(),
+      logseq.settings.alwaysRenderIn.substring(1),
+      logseq.settings?.defaultLanguage,
+      []
+    );
+    logseq.provideUI({
+      key: "calendar-widget",
+      path: logseq.settings.alwaysRenderIn,
+      reset: true,
+      template: calendar,
+    });
+  }
+
   provideStyle();
+
 };
 
 logseq.ready().then(main).catch(console.error);

@@ -90,7 +90,7 @@ export async function setCal(
 
 const getLang = async (language: string) => {
   const config = await logseq.App.getUserConfigs();
-  language = language || config.preferredLanguage;
+  language = language || logseq.settings?.defaultLanguage || config.preferredLanguage;
 
   type Lang = keyof typeof langs;
   const lang: Lang = (["zh-CN"].includes(language) ? language : "en") as Lang;
@@ -169,7 +169,7 @@ export async function drawCal(
   if (!options.includes("nohead")) {
     if (!options.includes("nonav")) {
       text += '<th COLSPAN=5 class="calendar-title">'; // create table header cell
-      text += `<strong class="calendar-month">${monthName}</strong> <strong class="calendar-year">${year}</strong>`;
+      text += `<span class="calendar-month">${monthName}</span> <span class="calendar-year">${year}</span>`;
       text += "</th>";
 
       text += '<th COLSPAN=2 class="calendar-nav">'; // close header cell
@@ -243,25 +243,23 @@ export async function drawCal(
 
       // @ts-ignore
       if (curCell < (firstDayOfWeek === "sunday" ? firstDay : firstDay - 1)) {
-        text += "<td></td>";
+        text += `<td></td>`;
         curCell++;
       } else {
         const journalTitle = format(
           new Date(`${year}-${month + 1}-${digit}`),
           config.preferredDateFormat
         );
+        const recordsClass = (logseq.settings?.enableDot && journalDays.includes(digit) ? "calendar-day-rec" : "");
         text +=
           "<td>" +
-          `<a class="button ${
+          `<a class="calendar-day ${recordsClass} button ${
             date === digit &&
             year === now.getFullYear() &&
             month === now.getMonth()
-              ? "calendar-td-today"
+              ? "calendar-day-today"
               : ""
           }" data-type="day" data-value="${journalTitle}" data-on-click="processJump">${digit}</a>` +
-          (logseq.settings?.enableDot && journalDays.includes(digit)
-            ? `<div class="calendar-dot"> </div>`
-            : "") +
           "</td>";
         digit++;
       }
@@ -318,7 +316,7 @@ export function provideStyle(opts: any = {}) {
       border-bottom: 0;
       font-size: 20px;
       font-weight: bold;
-      padding-left: 4px;
+      padding: 4px;
     }
     .logseq-block-calendar td {
       font-size: 14px;
@@ -340,7 +338,7 @@ export function provideStyle(opts: any = {}) {
     }
 
 
-    .logseq-block-calendar .calendar-td-today {
+    .logseq-block-calendar .calendar-day-today {
       font-weight: bold;
       color: blue;
     }
@@ -353,14 +351,15 @@ export function provideStyle(opts: any = {}) {
     .logseq-block-calendar .calendar-nav a {
       color: #999;
     }
-    .logseq-block-calendar .calendar-dot {
+    .logseq-block-calendar .calendar-day-rec::after {
+      content: "";
+      display: block;
       background-color: red;
       width: 4px;
       height: 4px;
       margin: auto;
-      margin-top: -8px;
-      margin-bottom: 4px;
-      border-radius: 2px;
+      margin-top: -2px;
+      border-radius: 100%;
     }
     `,
   });
