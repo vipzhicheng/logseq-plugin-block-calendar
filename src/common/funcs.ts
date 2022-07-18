@@ -305,6 +305,7 @@ export function provideStyle(opts: any = {}) {
     style: `
     .logseq-block-calendar {
       width: ${logseq.settings?.tableWidth || "100%"}
+      user-select: none;
     }
     .logseq-block-calendar tr:nth-child(even) {
       background-color: transparent;
@@ -323,26 +324,20 @@ export function provideStyle(opts: any = {}) {
       padding: 0;
       text-align: center;
     }
-
     .logseq-block-calendar .calendar-head {
       font-weight: bold;
       color: #999;
     }
-
     .logseq-block-calendar {
       margin: 0;
     }
-
     .logseq-block-calendar a {
       color: #000;
     }
-
-
     .logseq-block-calendar .calendar-day-today {
       font-weight: bold;
       color: blue;
     }
-
     .logseq-block-calendar .calendar-nav {
       text-align: right;
       font-size: 14px;
@@ -360,6 +355,10 @@ export function provideStyle(opts: any = {}) {
       margin: auto;
       margin-top: -2px;
       border-radius: 100%;
+    }
+    #right-sidebar-container #calendar-placeholder {
+      padding: 6px 16px 6px 12px;
+      border-top: 1px solid var(--ls-border-color);
     }
     `,
   });
