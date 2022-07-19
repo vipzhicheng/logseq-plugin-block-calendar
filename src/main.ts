@@ -1,6 +1,7 @@
 import "@logseq/libs";
 import { SettingSchemaDesc } from "@logseq/libs/dist/LSPlugin";
 import { setCal, provideStyle } from "./common/funcs";
+import langs from "./lang";
 
 const defineSettings: SettingSchemaDesc[] = [
   {
@@ -23,8 +24,9 @@ const defineSettings: SettingSchemaDesc[] = [
   },
   {
     key: "defaultLanguage",
-    type: "string",
+    type: "enum",
     title: "Language locale",
+    enumChoices: Object.keys(langs),
     description: "",
     default: "en",
   },
@@ -40,8 +42,8 @@ const defineSettings: SettingSchemaDesc[] = [
     type: "string",
     title: "",
     description:
-      "Always render calendar always in custom HTML element (provide CSS selector: ID or class)",
-    default: "#banner-widget-calendar",
+      "(Experimental!) Always render calendar in custom HTML element (provide CSS selector: ID or class), Leave empty to disable and input .sidebar-item-list to render calendar at right top in sidebar.",
+    default: ".sidebar-item-list",
   },
 ];
 
@@ -104,25 +106,72 @@ const main = async () => {
     }
   });
 
-  if (logseq.settings?.alwaysRenderIn) {
-    const now = new Date();
-    const calendar = await setCal(
-      now.getFullYear(),
-      now.getMonth(),
-      logseq.settings.alwaysRenderIn.substring(1),
-      logseq.settings?.defaultLanguage,
-      []
-    );
-    logseq.provideUI({
-      key: "calendar-widget",
-      path: logseq.settings.alwaysRenderIn,
-      reset: true,
-      template: calendar,
-    });
-  }
+  const renderAlwaysIn = async (containerSelector: string) => {
+    const calendarPlaceholderId = "calendar-placeholder";
+
+    if (containerSelector) {
+      const container = top?.document.querySelector(
+        containerSelector
+      ) as HTMLElement;
+      const placeholderExist = top?.document.querySelector(
+        `#${calendarPlaceholderId}`
+      ) as HTMLElement;
+      if (placeholderExist) {
+        placeholderExist.style.display = "block";
+      }
+      if (container && !placeholderExist) {
+        const calendarPlaceholder = top!.document.createElement("div");
+        calendarPlaceholder.id = calendarPlaceholderId;
+        calendarPlaceholder.style.display = "block";
+        container.insertAdjacentElement("afterbegin", calendarPlaceholder);
+      }
+
+      const now = new Date();
+      const calendar = await setCal(
+        now.getFullYear(),
+        now.getMonth(),
+        calendarPlaceholderId,
+        logseq.settings?.defaultLanguage,
+        []
+      );
+      logseq.provideUI({
+        key: "calendar-widget",
+        path: `#${calendarPlaceholderId}`,
+        reset: true,
+        template: calendar,
+      });
+    } else {
+      const placeholderExist = top?.document.querySelector(
+        `#${calendarPlaceholderId}`
+      ) as HTMLElement;
+      if (placeholderExist) {
+        placeholderExist.style.display = "none";
+      }
+      logseq.provideUI({
+        key: "calendar-widget",
+        path: `#${calendarPlaceholderId}`,
+        reset: true,
+        template: "",
+      });
+    }
+  };
+
+  setTimeout(async () => {
+    await renderAlwaysIn(logseq.settings?.alwaysRenderIn);
+  }, 1000);
+  logseq.App.onSidebarVisibleChanged(async (visible) => {
+    if (visible) {
+      await renderAlwaysIn(logseq.settings?.alwaysRenderIn);
+    }
+  });
+  logseq.onSettingsChanged(async (newSettings: any, oldSettings: any) => {
+    console.log({ newSettings, oldSettings });
+    if (newSettings.alwaysRenderIn !== oldSettings.alwaysRenderIn) {
+      await renderAlwaysIn(newSettings.alwaysRenderIn);
+    }
+  });
 
   provideStyle();
-
 };
 
 logseq.ready().then(main).catch(console.error);

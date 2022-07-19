@@ -62,6 +62,7 @@ export async function setCal(
   options: string[]
 ) {
   clearJournalDays();
+  language = language || logseq.settings?.defaultLanguage;
   const lang = await getLang(language);
   const now = new Date();
   const monthName = await getMonthName(month0, lang);
@@ -89,11 +90,10 @@ export async function setCal(
 }
 
 const getLang = async (language: string) => {
-  const config = await logseq.App.getUserConfigs();
-  language = language || logseq.settings?.defaultLanguage || config.preferredLanguage;
-
   type Lang = keyof typeof langs;
-  const lang: Lang = (["zh-CN"].includes(language) ? language : "en") as Lang;
+  const lang: Lang = (
+    Object.keys(langs).includes(language) ? language : "en"
+  ) as Lang;
 
   return langs[lang];
 };
@@ -111,7 +111,7 @@ async function getJournalDays(year: number, month: number) {
     journalDays = Object.keys(journalsReduce)
       .map((it: any) => {
         const d = dayjs(journalsReduce[it][`journal-day`].toString());
-        if (d.isValid() && !d.isToday()) {
+        if (d.isValid()) {
           return d.date();
         }
         return 0;
@@ -250,7 +250,10 @@ export async function drawCal(
           new Date(`${year}-${month + 1}-${digit}`),
           config.preferredDateFormat
         );
-        const recordsClass = (logseq.settings?.enableDot && journalDays.includes(digit) ? "calendar-day-rec" : "");
+        const recordsClass =
+          logseq.settings?.enableDot && journalDays.includes(digit)
+            ? "calendar-day-rec"
+            : "";
         text +=
           "<td>" +
           `<a class="calendar-day ${recordsClass} button ${
@@ -304,7 +307,8 @@ export function provideStyle(opts: any = {}) {
     key: "block-calendar",
     style: `
     .logseq-block-calendar {
-      width: ${logseq.settings?.tableWidth || "100%"}
+      width: ${logseq.settings?.tableWidth || "100%"};
+      user-select: none;
     }
     .logseq-block-calendar tr:nth-child(even) {
       background-color: transparent;
@@ -334,13 +338,13 @@ export function provideStyle(opts: any = {}) {
     }
 
     .logseq-block-calendar a {
-      color: #000;
+      color: var(--ls-primary-text-color);
     }
 
 
     .logseq-block-calendar .calendar-day-today {
       font-weight: bold;
-      color: blue;
+      color: var(--ls-link-text-color);
     }
 
     .logseq-block-calendar .calendar-nav {
@@ -360,6 +364,9 @@ export function provideStyle(opts: any = {}) {
       margin: auto;
       margin-top: -2px;
       border-radius: 100%;
+    }
+    #right-sidebar-container #calendar-placeholder {
+      padding: 6px 16px 6px 12px;
     }
     `,
   });
