@@ -42,7 +42,7 @@ const defineSettings: SettingSchemaDesc[] = [
     type: "string",
     title: "",
     description:
-      "(Experimental!) Always render calendar in custom HTML element (provide CSS selector: ID or class), Leave empty to disable and input .sidebar-item-list to render calendar at right top in sidebar.",
+      "Always render calendar in custom HTML element (provide CSS selector: ID or class), Leave empty to disable and input .sidebar-item-list to render calendar at right top in sidebar.",
     default: ".sidebar-item-list",
   },
 ];
