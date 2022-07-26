@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.1.1
+
+- feat: add more language packs.
+
 ## v0.1.0
 
 - fix: color in dark theme. #4

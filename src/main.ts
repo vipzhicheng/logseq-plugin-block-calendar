@@ -1,6 +1,6 @@
 import "@logseq/libs";
 import { SettingSchemaDesc } from "@logseq/libs/dist/LSPlugin";
-import { setCal, provideStyle } from "./common/funcs";
+import { setCal, provideStyle, languageMapping } from "./common/funcs";
 import langs from "./lang";
 
 const defineSettings: SettingSchemaDesc[] = [
@@ -26,7 +26,7 @@ const defineSettings: SettingSchemaDesc[] = [
     key: "defaultLanguage",
     type: "enum",
     title: "Language locale",
-    enumChoices: Object.keys(langs),
+    enumChoices: Object.keys(languageMapping),
     description: "",
     default: "en",
   },

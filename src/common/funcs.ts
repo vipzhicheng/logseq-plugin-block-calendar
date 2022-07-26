@@ -6,6 +6,26 @@ import langs from "../lang";
 
 dayjs.extend(isToday);
 
+export const languageMapping: {
+  [key: string]: string;
+} = {
+  English: "en",
+  Français: "fr",
+  Deutsch: "de",
+  简体中文: "zh-CN",
+  繁體中文: "zh-Hant",
+  Afrikaans: "af",
+  Español: "es",
+  "Norsk (bokmål)": "nb-NO",
+  "Português (Brasileiro)": "pt-BR",
+  "Português (Europeu)": "pt-PT",
+  Русский: "ru",
+  日本語: "ja",
+  Italiano: "it",
+  Türkçe: "tr",
+  한국어: "ko",
+};
+
 function leapYear(year: number) {
   if (year % 4 == 0)
     // basic rule
@@ -92,7 +112,9 @@ export async function setCal(
 const getLang = async (language: string) => {
   type Lang = keyof typeof langs;
   const lang: Lang = (
-    Object.keys(langs).includes(language) ? language : "en"
+    Object.keys(langs).includes(languageMapping[language])
+      ? languageMapping[language]
+      : "en"
   ) as Lang;
 
   return langs[lang];
