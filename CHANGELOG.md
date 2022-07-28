@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.1.2
+
+- fix: mistakes in language packs(pt-BR, es, ru, de), thx for the pr #6, #7, #8
+
 ## v0.1.1
 
 - feat: add more language packs.

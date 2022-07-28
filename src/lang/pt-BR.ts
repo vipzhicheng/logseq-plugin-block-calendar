@@ -14,7 +14,7 @@ export default {
   December: "Dezembro",
 
   // Weekday
-  Sunday: "Sol",
+  Sunday: "Dom",
   Monday: "Seg",
   Tuesday: "Ter",
   Wednesday: "Qua",
