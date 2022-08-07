@@ -276,15 +276,16 @@ export async function drawCal(
           logseq.settings?.enableDot && journalDays.includes(digit)
             ? "calendar-day-rec"
             : "";
+        let dayClass = "";
+        if ((date > digit && year === now.getFullYear() && month === now.getMonth()) || month < now.getMonth() ) {
+          dayClass = "calendar-day-past";
+        }
+        if (date === digit && year === now.getFullYear() && month === now.getMonth()) {
+          dayClass = "calendar-day-today";
+        }
         text +=
           "<td>" +
-          `<a class="calendar-day ${recordsClass} button ${
-            date === digit &&
-            year === now.getFullYear() &&
-            month === now.getMonth()
-              ? "calendar-day-today"
-              : ""
-          }" data-type="day" data-value="${journalTitle}" data-on-click="processJump">${digit}</a>` +
+          `<a class="calendar-day ${recordsClass} button ${dayClass}" data-type="day" data-value="${journalTitle}" data-on-click="processJump">${digit}</a>` +
           "</td>";
         digit++;
       }
@@ -352,7 +353,7 @@ export function provideStyle(opts: any = {}) {
 
     .logseq-block-calendar .calendar-head {
       font-weight: bold;
-      color: #999;
+      color: #999999;
     }
 
     .logseq-block-calendar {
@@ -363,10 +364,13 @@ export function provideStyle(opts: any = {}) {
       color: var(--ls-primary-text-color);
     }
 
-
     .logseq-block-calendar .calendar-day-today {
       font-weight: bold;
       color: var(--ls-link-text-color);
+    }
+
+    .logseq-block-calendar .calendar-day-past {
+      color: #999999;
     }
 
     .logseq-block-calendar .calendar-nav {
@@ -375,7 +379,7 @@ export function provideStyle(opts: any = {}) {
       font-weight: bold;
     }
     .logseq-block-calendar .calendar-nav a {
-      color: #999;
+      color: #999999;
     }
     .logseq-block-calendar .calendar-day-rec::after {
       content: "";
