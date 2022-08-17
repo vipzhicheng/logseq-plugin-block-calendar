@@ -16,7 +16,7 @@ export default {
   // Weekday
   Sunday: "Sun",
   Monday: "Mon",
-  Tuesday: "Tues",
+  Tuesday: "Tue",
   Wednesday: "Wed",
   Thursday: "Thu",
   Friday: "Fri",
