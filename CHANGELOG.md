@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.1.3
+
+- fix: language packs(en), thx for the pr #15
+
 ## v0.1.2
 
 - fix: mistakes in language packs(pt-BR, es, ru, de), thx for the pr #6, #7, #8
