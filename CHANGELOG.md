@@ -3,6 +3,7 @@
 ## v0.1.3
 
 - fix: language packs(en), thx for the pr #15
+- feat: support different color for past days #14
 
 ## v0.1.2
 
