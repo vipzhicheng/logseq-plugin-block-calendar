@@ -107,9 +107,10 @@ const main = async () => {
   });
 
   const renderAlwaysIn = async (containerSelector: string) => {
+    const config = await logseq.App.getUserConfigs();
     const calendarPlaceholderId = "calendar-placeholder";
 
-    if (containerSelector) {
+    if (containerSelector && config.enabledJournals) {
       const container = top?.document.querySelector(
         containerSelector
       ) as HTMLElement;
@@ -159,6 +160,11 @@ const main = async () => {
   setTimeout(async () => {
     await renderAlwaysIn(logseq.settings?.alwaysRenderIn);
   }, 1000);
+  logseq.App.onCurrentGraphChanged(() => {
+    setTimeout(async () => {
+      await renderAlwaysIn(logseq.settings?.alwaysRenderIn);
+    }, 1000);
+  });
   logseq.App.onSidebarVisibleChanged(async (visible) => {
     if (visible) {
       await renderAlwaysIn(logseq.settings?.alwaysRenderIn);

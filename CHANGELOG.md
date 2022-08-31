@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.1.4
+
+- fix: disable sidebar calendar when journal disabled.
+- fix: calendar updated when current graph change.
+- infra: upgrade deps.
+
 ## v0.1.3
 
 - fix: language packs(en), thx for the pr #15
