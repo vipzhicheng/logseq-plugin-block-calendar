@@ -277,15 +277,24 @@ export async function drawCal(
             ? "calendar-day-rec"
             : "";
         let dayClass = "";
-        if ((date > digit && year === now.getFullYear() && month === now.getMonth()) || month < now.getMonth() ) {
+        if (
+          (date > digit &&
+            year === now.getFullYear() &&
+            month === now.getMonth()) ||
+          month < now.getMonth()
+        ) {
           dayClass = "calendar-day-past";
         }
-        if (date === digit && year === now.getFullYear() && month === now.getMonth()) {
+        if (
+          date === digit &&
+          year === now.getFullYear() &&
+          month === now.getMonth()
+        ) {
           dayClass = "calendar-day-today";
         }
         text +=
           "<td>" +
-          `<a class="calendar-day ${recordsClass} button ${dayClass}" data-type="day" data-value="${journalTitle}" data-on-click="processJump">${digit}</a>` +
+          `<a class="calendar-day ${recordsClass} button ${dayClass}" data-type="day" data-value="${journalTitle}" data-on-click="processJump">${digit}<span class="dot1"></span><span class="dot2"></span></a>` +
           "</td>";
         digit++;
       }
@@ -381,15 +390,38 @@ export function provideStyle(opts: any = {}) {
     .logseq-block-calendar .calendar-nav a {
       color: #999999;
     }
-    .logseq-block-calendar .calendar-day-rec::after {
+    .logseq-block-calendar .calendar-day-rec .dot2::after {
       content: "";
       display: block;
-      background-color: red;
+      background-color: ${logseq.settings?.taskDotColor || "green"};
+      width: 4px;
+      height: 4px;
+      margin: auto;
+      margin-top: -2px;
+      margin-right: 10px;
+      float: right;
+      transform: rotate(45deg);
+    }
+    .logseq-block-calendar .calendar-day-rec .dot1::after {
+      content: "";
+      display: block;
+      background-color: ${logseq.settings?.journalDotColor || "red"};
       width: 4px;
       height: 4px;
       margin: auto;
       margin-top: -2px;
       border-radius: 100%;
+      margin-left: 10px;
+      float: left;
+    }
+    .logseq-block-calendar .calendar-day-rec .dot::after {
+      content: "";
+      display: block;
+      background-color: ${logseq.settings?.journalDotColor || "red"};
+      width: 4px;
+      height: 4px;
+      margin: auto;
+      margin-top: -2px;
     }
     #right-sidebar-container #calendar-placeholder {
       padding: 6px 16px 6px 12px;

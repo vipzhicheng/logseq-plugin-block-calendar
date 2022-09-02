@@ -13,6 +13,22 @@ const defineSettings: SettingSchemaDesc[] = [
     default: true,
   },
   {
+    key: "journalDotColor",
+    type: "string",
+    title: "Journal dot color",
+    description: "Journal dot color",
+    default: "#ff0000",
+    inputAs: "color",
+  },
+  {
+    key: "taskDotColor",
+    type: "string",
+    title: "Task dot color",
+    description: "Task dot color",
+    default: "#00ff00",
+    inputAs: "color",
+  },
+  {
     key: "firstDayOfWeek",
     type: "enum",
     title: "First day of week",
