@@ -390,10 +390,10 @@ export function provideStyle(opts: any = {}) {
     .logseq-block-calendar .calendar-nav a {
       color: #999999;
     }
-    .logseq-block-calendar .calendar-day-rec .dot2::after {
+    .logseq-block-calendar .calendar-day-rec .dot-task-undone::after {
       content: "";
       display: block;
-      background-color: ${logseq.settings?.taskDotColor || "green"};
+      background-color: ${logseq.settings?.taskUndoneDotColor};
       width: 4px;
       height: 4px;
       margin: auto;
@@ -402,10 +402,22 @@ export function provideStyle(opts: any = {}) {
       float: right;
       transform: rotate(45deg);
     }
-    .logseq-block-calendar .calendar-day-rec .dot1::after {
+    .logseq-block-calendar .calendar-day-rec .dot-task-done::after {
       content: "";
       display: block;
-      background-color: ${logseq.settings?.journalDotColor || "red"};
+      background-color: ${logseq.settings?.taskDoneDotColor};
+      width: 4px;
+      height: 4px;
+      margin: auto;
+      margin-top: -2px;
+      margin-right: 10px;
+      float: right;
+      transform: rotate(45deg);
+    }
+    .logseq-block-calendar .calendar-day-rec .dot-journal::after {
+      content: "";
+      display: block;
+      background-color: ${logseq.settings?.journalDotColor};
       width: 4px;
       height: 4px;
       margin: auto;
