@@ -9,7 +9,7 @@ const defineSettings: SettingSchemaDesc[] = [
     type: "boolean",
     title: "Enable dot",
     description:
-      "Enable red dot, to show weather or not journal exist on that day. Need reload to take effect.",
+      "Enable red dot, to show whether or not journal exists on that day. Need reload to take effect.",
     default: true,
   },
   {
