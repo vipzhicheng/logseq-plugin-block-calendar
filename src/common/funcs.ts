@@ -81,7 +81,7 @@ export async function setCal(
   language: string,
   options: string[]
 ) {
-  clearJournalDays();
+  clearCachedDays();
   language = language || logseq.settings?.defaultLanguage;
   const lang = await getLang(language);
   const now = new Date();
@@ -144,12 +144,74 @@ async function getJournalDays(year: number, month: number) {
   return journalDays;
 }
 
-export function clearJournalDays() {
+let undoneTaskDays: number[] = [];
+async function getUndoneTaskDays(year: number, month: number) {
+  if (undoneTaskDays.length === 0) {
+    const undoneTaskJournals = await _getCurrentRepoRangeUndoneTaskJournals(
+      year,
+      month + 1
+    );
+    const undoneTaskJournalsReduce = undoneTaskJournals.reduce(
+      (ac: any, it: any) => {
+        const k = it[`journal-day`].toString();
+        ac[k] = it;
+        return ac;
+      },
+      {}
+    );
+
+    undoneTaskDays = Object.keys(undoneTaskJournalsReduce)
+      .map((it: any) => {
+        const d = dayjs(undoneTaskJournalsReduce[it][`journal-day`].toString());
+        if (d.isValid()) {
+          return d.date();
+        }
+        return 0;
+      })
+      .filter((it) => it > 0);
+  }
+
+  return undoneTaskDays;
+}
+
+let doneTaskDays: number[] = [];
+async function getDoneTaskDays(year: number, month: number) {
+  if (doneTaskDays.length === 0) {
+    const doneTaskJournals = await _getCurrentRepoRangeDoneTaskJournals(
+      year,
+      month + 1
+    );
+    const doneTaskJournalsReduce = doneTaskJournals.reduce(
+      (ac: any, it: any) => {
+        const k = it[`journal-day`].toString();
+        ac[k] = it;
+        return ac;
+      },
+      {}
+    );
+
+    doneTaskDays = Object.keys(doneTaskJournalsReduce)
+      .map((it: any) => {
+        const d = dayjs(doneTaskJournalsReduce[it][`journal-day`].toString());
+        if (d.isValid()) {
+          return d.date();
+        }
+        return 0;
+      })
+      .filter((it) => it > 0);
+  }
+
+  return doneTaskDays;
+}
+
+export function clearCachedDays() {
   journalDays = [];
+  undoneTaskDays = [];
+  doneTaskDays = [];
 }
 
 logseq.App.onCurrentGraphChanged(() => {
-  clearJournalDays();
+  clearCachedDays();
 });
 
 export async function drawCal(
@@ -169,6 +231,8 @@ export async function drawCal(
   const config = await logseq.App.getUserConfigs();
 
   const journalDays = await getJournalDays(year, month);
+  const undoneTaskDays = await getUndoneTaskDays(year, month);
+  const doneTaskDays = await getDoneTaskDays(year, month);
 
   let previousMonth = month - 1;
   let previousMonthYear = year;
@@ -272,10 +336,13 @@ export async function drawCal(
           new Date(`${year}-${month + 1}-${digit}`),
           config.preferredDateFormat
         );
-        const recordsClass =
-          logseq.settings?.enableDot && journalDays.includes(digit)
-            ? "calendar-day-rec"
-            : "";
+        const recordsClass = "calendar-day-rec";
+        const hasJournal =
+          logseq.settings?.enableDot && journalDays.includes(digit);
+        const hasUndoneTask =
+          logseq.settings?.enableDot && undoneTaskDays.includes(digit);
+        const hasDoneTask =
+          logseq.settings?.enableDot && doneTaskDays.includes(digit);
         let dayClass = "";
         if (
           (date > digit &&
@@ -294,7 +361,15 @@ export async function drawCal(
         }
         text +=
           "<td>" +
-          `<a class="calendar-day ${recordsClass} button ${dayClass}" data-type="day" data-value="${journalTitle}" data-on-click="processJump">${digit}<span class="dot1"></span><span class="dot2"></span></a>` +
+          `<a class="calendar-day ${recordsClass} button ${dayClass}" data-type="day" data-value="${journalTitle}" data-on-click="processJump">${digit}${
+            hasJournal && !hasDoneTask && !hasUndoneTask
+              ? '<span class="dot-journal-without-task"></span>'
+              : hasJournal && hasUndoneTask
+              ? '<span class="dot-journal-with-task"></span><span class="dot-task-undone"></span>'
+              : hasJournal && hasDoneTask
+              ? '<span class="dot-journal-with-task"></span><span class="dot-task-done"></span>'
+              : ""
+          }` +
           "</td>";
         digit++;
       }
@@ -326,6 +401,56 @@ async function _getCurrentRepoRangeJournals(year: number, month: number) {
        [?p :block/journal? true]
        [?p :block/journal-day ?d]
        [(>= ?d ${my}01)] [(<= ?d ${my}31)]]
+    `);
+  } catch (e) {
+    console.error(e);
+  }
+  return (ret || []).flat();
+}
+
+async function _getCurrentRepoRangeUndoneTaskJournals(
+  year: number,
+  month: number
+) {
+  const my = year + (month < 10 ? "0" : "") + month;
+  let ret;
+  try {
+    ret = await logseq.DB.datascriptQuery(`
+      [:find (pull ?p [*])
+        :where
+        [?b :block/marker ?marker]
+        [(contains? #{"NOW" "LATER" "TODO" "DOING", "WAITING"} ?marker)]
+        [?b :block/page ?p]
+          [?p :block/journal? true]
+          [?p :block/journal-day ?d]
+          [(>= ?d ${my}01)] [(<= ?d ${my}31)]]
+          ]
+
+    `);
+  } catch (e) {
+    console.error(e);
+  }
+  return (ret || []).flat();
+}
+
+async function _getCurrentRepoRangeDoneTaskJournals(
+  year: number,
+  month: number
+) {
+  const my = year + (month < 10 ? "0" : "") + month;
+  let ret;
+  try {
+    ret = await logseq.DB.datascriptQuery(`
+      [:find (pull ?p [*])
+        :where
+        [?b :block/marker ?marker]
+        [(contains? #{"DONE"} ?marker)]
+        [?b :block/page ?p]
+          [?p :block/journal? true]
+          [?p :block/journal-day ?d]
+          [(>= ?d ${my}01)] [(<= ?d ${my}31)]]
+          ]
+
     `);
   } catch (e) {
     console.error(e);
@@ -390,17 +515,18 @@ export function provideStyle(opts: any = {}) {
     .logseq-block-calendar .calendar-nav a {
       color: #999999;
     }
+    .logseq-block-calendar .calendar-day-rec {
+      position: relative;
+    }
     .logseq-block-calendar .calendar-day-rec .dot-task-undone::after {
       content: "";
       display: block;
       background-color: ${logseq.settings?.taskUndoneDotColor};
       width: 4px;
       height: 4px;
-      margin: auto;
-      margin-top: -2px;
-      margin-right: 10px;
-      float: right;
       transform: rotate(45deg);
+      position: absolute;
+      right: calc(50% - 5px);
     }
     .logseq-block-calendar .calendar-day-rec .dot-task-done::after {
       content: "";
@@ -408,32 +534,27 @@ export function provideStyle(opts: any = {}) {
       background-color: ${logseq.settings?.taskDoneDotColor};
       width: 4px;
       height: 4px;
-      margin: auto;
-      margin-top: -2px;
-      margin-right: 10px;
-      float: right;
       transform: rotate(45deg);
+      position: absolute;
+      right: calc(50% - 5px);
     }
-    .logseq-block-calendar .calendar-day-rec .dot-journal::after {
+    .logseq-block-calendar .calendar-day-rec .dot-journal-with-task::after {
       content: "";
       display: block;
       background-color: ${logseq.settings?.journalDotColor};
       width: 4px;
       height: 4px;
-      margin: auto;
-      margin-top: -2px;
       border-radius: 100%;
-      margin-left: 10px;
-      float: left;
+      position: absolute;
+      left: calc(50% - 5px);
     }
-    .logseq-block-calendar .calendar-day-rec .dot::after {
+    .logseq-block-calendar .calendar-day-rec .dot-journal-without-task::after {
       content: "";
       display: block;
       background-color: ${logseq.settings?.journalDotColor || "red"};
       width: 4px;
       height: 4px;
       margin: auto;
-      margin-top: -2px;
     }
     #right-sidebar-container #calendar-placeholder {
       padding: 6px 16px 6px 12px;

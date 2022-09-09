@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v0.1.5
+
+- feat: support dot color customization
+- feat: support task dot, and task dot has two statuses which are for journals with done and undone tasks.
+
 ## v0.1.4
 
 - fix: disable sidebar calendar when journal disabled.

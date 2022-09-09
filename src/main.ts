@@ -25,7 +25,7 @@ const defineSettings: SettingSchemaDesc[] = [
     type: "string",
     title: "Undone task dot color",
     description: "Undone task dot color",
-    default: "#ff0000",
+    default: "#ff18ff",
     inputAs: "color",
   },
   {
@@ -33,7 +33,7 @@ const defineSettings: SettingSchemaDesc[] = [
     type: "string",
     title: "Done task dot color",
     description: "Done task dot color",
-    default: "#00ff00",
+    default: "#03b803",
     inputAs: "color",
   },
   {
