@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.1.6
+
+- fix: wrong dot style on day without task.
+
 ## v0.1.5
 
 - feat: support dot color customization

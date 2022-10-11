@@ -555,6 +555,7 @@ export function provideStyle(opts: any = {}) {
       width: 4px;
       height: 4px;
       margin: auto;
+      border-radius: 100%;
     }
     #right-sidebar-container #calendar-placeholder {
       padding: 6px 16px 6px 12px;
