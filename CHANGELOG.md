@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.1.7
+
+- fix typos in settings. #16
+
 ## v0.1.6
 
 - fix: wrong dot style on day without task.
