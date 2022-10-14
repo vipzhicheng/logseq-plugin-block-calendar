@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.1.8
+
+- fix: change left and right button to svg
+
 ## v0.1.7
 
 - fix typos in settings. #16

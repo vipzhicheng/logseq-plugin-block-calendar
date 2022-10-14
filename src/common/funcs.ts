@@ -264,7 +264,10 @@ export async function drawCal(
         previousMonth + 1
       }" data-slot="${slot}" data-language="${language}" data-options="${options.join(
         " "
-      )}" data-on-click="loadCalendar" title="Jump to previous month.">&lt;</a> <a class="" data-year="${now.getFullYear()}" data-month="${
+      )}" data-on-click="loadCalendar" title="Jump to previous month."><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-left inline-block" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <polyline points="15 6 9 12 15 18" />
+    </svg></a> <a class="" data-year="${now.getFullYear()}" data-month="${
         now.getMonth() + 1
       }" data-slot="${slot}" data-language="${language}" data-options="${options.join(
         " "
@@ -274,7 +277,10 @@ export async function drawCal(
         nextMonth + 1
       }" data-slot="${slot}" data-language="${language}" data-options="${options.join(
         " "
-      )}" data-on-click="loadCalendar" title="Jump to next month">&gt;</a>`;
+      )}" data-on-click="loadCalendar" title="Jump to next month"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-right inline-block" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <polyline points="9 6 15 12 9 18" />
+    </svg></a>`;
       text += "</th>";
     } else {
       text += '<th COLSPAN=7 class="calendar-title">'; // create table header cell
