@@ -1,6 +1,6 @@
 {
   "name": "logseq-plugin-block-calendar",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "A plugin to render a calendar in block, so you can put it onto right side bar.",
   "main": "index.html",
   "scripts": {
