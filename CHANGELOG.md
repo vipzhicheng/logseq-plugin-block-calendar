@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.1.9
+
+- fix: language pack(fr)
+
 ## v0.1.8
 
 - fix: change left and right button to svg

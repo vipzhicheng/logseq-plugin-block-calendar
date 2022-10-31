@@ -14,9 +14,9 @@ export default {
   December: "Décembre",
 
   // Weekday
-  Sunday: "Soleil",
+  Sunday: "Dim",
   Monday: "Lun",
-  Tuesday: "Mardi",
+  Tuesday: "Mar",
   Wednesday: "Mer",
   Thursday: "Jeu",
   Friday: "Ven",
