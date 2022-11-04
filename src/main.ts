@@ -172,12 +172,14 @@ const main = async () => {
       if (placeholderExist) {
         placeholderExist.style.display = "none";
       }
-      logseq.provideUI({
-        key: "calendar-widget",
-        path: `#${calendarPlaceholderId}`,
-        reset: true,
-        template: "",
-      });
+      if (placeholderExist) {
+        logseq.provideUI({
+          key: "calendar-widget",
+          path: `#${calendarPlaceholderId}`,
+          reset: true,
+          template: "",
+        });
+      }
     }
   };
 

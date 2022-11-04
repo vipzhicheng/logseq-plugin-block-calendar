@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.1.10
+
+- fix: wrong calentdar on 2023-01
+
 ## v0.1.9
 
 - fix: language pack(fr)

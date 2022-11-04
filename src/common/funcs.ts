@@ -334,7 +334,14 @@ export async function drawCal(
       if (digit > lastDate) break;
 
       // @ts-ignore
-      if (curCell < (firstDayOfWeek === "sunday" ? firstDay : firstDay - 1)) {
+      if (
+        curCell <
+        (firstDayOfWeek === "sunday"
+          ? firstDay
+          : firstDay - 1 > 0
+          ? firstDay - 1
+          : 7)
+      ) {
         text += `<td></td>`;
         curCell++;
       } else {
