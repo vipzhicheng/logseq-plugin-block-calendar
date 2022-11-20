@@ -1,5 +1,5 @@
 import "@logseq/libs";
-import { format } from "date-fns";
+import { format, isBefore, isToday as _isToday } from "date-fns";
 import dayjs from "dayjs";
 import isToday from "dayjs/plugin/isToday";
 import langs from "../lang";
@@ -345,8 +345,9 @@ export async function drawCal(
         text += `<td></td>`;
         curCell++;
       } else {
+        const curDate = new Date(`${year}-${month + 1}-${digit > 9 ? digit : `0${digit}`} 12:00`)
         const journalTitle = format(
-          new Date(`${year}-${month + 1}-${digit > 9 ? digit : `0${digit}`} 12:00`),
+          curDate,
           config.preferredDateFormat
         );
         const recordsClass = "calendar-day-rec";
@@ -357,19 +358,10 @@ export async function drawCal(
         const hasDoneTask =
           logseq.settings?.enableDot && doneTaskDays.includes(digit);
         let dayClass = "";
-        if (
-          (date > digit &&
-            year === now.getFullYear() &&
-            month === now.getMonth()) ||
-          month < now.getMonth()
-        ) {
+        if (isBefore(curDate, new Date())) {
           dayClass = "calendar-day-past";
         }
-        if (
-          date === digit &&
-          year === now.getFullYear() &&
-          month === now.getMonth()
-        ) {
+        if (_isToday(curDate)) {
           dayClass = "calendar-day-today";
         }
         text +=
