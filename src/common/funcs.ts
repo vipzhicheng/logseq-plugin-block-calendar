@@ -346,7 +346,7 @@ export async function drawCal(
         curCell++;
       } else {
         const journalTitle = format(
-          new Date(`${year}-${month + 1}-${digit}`),
+          new Date(`${year}-${month + 1}-${digit > 9 ? digit : `0${digit}`} 12:00`),
           config.preferredDateFormat
         );
         const recordsClass = "calendar-day-rec";
