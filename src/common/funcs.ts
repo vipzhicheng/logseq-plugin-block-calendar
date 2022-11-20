@@ -514,6 +514,7 @@ export function provideStyle(opts: any = {}) {
     .logseq-block-calendar .calendar-day-today {
       font-weight: bold;
       color: var(--ls-link-text-color);
+      background-color: rgba(153, 153, 153, 0.3);
     }
 
     .logseq-block-calendar .calendar-day-past {
