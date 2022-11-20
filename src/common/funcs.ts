@@ -509,12 +509,14 @@ export function provideStyle(opts: any = {}) {
 
     .logseq-block-calendar a {
       color: var(--ls-primary-text-color);
+      max-width: 50px;
+      margin: 0 auto;
     }
 
     .logseq-block-calendar .calendar-day-today {
       font-weight: bold;
       color: var(--ls-link-text-color);
-      background-color: rgba(153, 153, 153, 0.3);
+      background-color: rgba(153, 153, 153, 0.2);
     }
 
     .logseq-block-calendar .calendar-day-past {
@@ -535,7 +537,7 @@ export function provideStyle(opts: any = {}) {
     .logseq-block-calendar .calendar-day-rec .dot-task-undone::after {
       content: "";
       display: block;
-      background-color: ${logseq.settings?.taskUndoneDotColor};
+      background-color: #f87171;
       width: 4px;
       height: 4px;
       transform: rotate(45deg);
@@ -545,7 +547,7 @@ export function provideStyle(opts: any = {}) {
     .logseq-block-calendar .calendar-day-rec .dot-task-done::after {
       content: "";
       display: block;
-      background-color: ${logseq.settings?.taskDoneDotColor};
+      background-color: #4ade80;
       width: 4px;
       height: 4px;
       transform: rotate(45deg);
@@ -555,7 +557,7 @@ export function provideStyle(opts: any = {}) {
     .logseq-block-calendar .calendar-day-rec .dot-journal-with-task::after {
       content: "";
       display: block;
-      background-color: ${logseq.settings?.journalDotColor};
+      background-color: #60a5fa;
       width: 4px;
       height: 4px;
       border-radius: 100%;
@@ -565,7 +567,7 @@ export function provideStyle(opts: any = {}) {
     .logseq-block-calendar .calendar-day-rec .dot-journal-without-task::after {
       content: "";
       display: block;
-      background-color: ${logseq.settings?.journalDotColor || "red"};
+      background-color: #60a5fa;
       width: 4px;
       height: 4px;
       margin: auto;
