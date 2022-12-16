@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.1.11
+
+- fix: adjust style
+
 ## v0.1.10
 
 - fix: wrong calentdar on 2023-01

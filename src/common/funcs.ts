@@ -254,26 +254,26 @@ export async function drawCal(
 
   if (!options.includes("nohead")) {
     if (!options.includes("nonav")) {
-      text += '<th COLSPAN=5 class="calendar-title">'; // create table header cell
+      text += '<th COLSPAN=4 class="calendar-title">'; // create table header cell
       text += `<span class="calendar-month">${monthName}</span> <span class="calendar-year">${year}</span>`;
       text += "</th>";
 
-      text += '<th COLSPAN=2 class="calendar-nav">'; // close header cell
+      text += '<th COLSPAN=3 class="calendar-nav">'; // close header cell
 
-      text += `<a class="" data-year="${previousMonthYear}" data-month="${
+      text += `<a class="button inline-button no-padding-button" data-year="${previousMonthYear}" data-month="${
         previousMonth + 1
       }" data-slot="${slot}" data-language="${language}" data-options="${options.join(
         " "
       )}" data-on-click="loadCalendar" title="Jump to previous month."><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-left inline-block" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
       <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
       <polyline points="15 6 9 12 15 18" />
-    </svg></a> <a class="" data-year="${now.getFullYear()}" data-month="${
+    </svg></a> <a class="button inline-button padding-button" data-year="${now.getFullYear()}" data-month="${
         now.getMonth() + 1
       }" data-slot="${slot}" data-language="${language}" data-options="${options.join(
         " "
       )}" data-on-click="loadCalendar" title="Jump back to current month.">${
         lang.Today
-      }</a> <a class="" data-year="${nextMonthYear}" data-month="${
+      }</a> <a class="button inline-button no-padding-button" data-year="${nextMonthYear}" data-month="${
         nextMonth + 1
       }" data-slot="${slot}" data-language="${language}" data-options="${options.join(
         " "
@@ -374,7 +374,7 @@ export async function drawCal(
         }
         text +=
           "<td>" +
-          `<a class="calendar-day ${recordsClass} button ${dayClass}" data-type="day" data-value="${journalTitle}" data-on-click="processJump">${digit}${
+          `<a class="calendar-day ${recordsClass} button inline-button ${dayClass}" data-type="day" data-value="${journalTitle}" data-on-click="processJump">${digit}${
             hasJournal && !hasDoneTask && !hasUndoneTask
               ? '<span class="dot-journal-without-task"></span>'
               : hasJournal && hasUndoneTask
@@ -479,6 +479,25 @@ export function provideStyle(opts: any = {}) {
     .logseq-block-calendar {
       width: ${logseq.settings?.tableWidth || "100%"};
       user-select: none;
+      margin: 0;
+      table-layout:fixed;
+      min-width: 295px;
+    }
+    .logseq-block-calendar .calendar-title {
+      font-weight: normal;
+    }
+    .logseq-block-calendar .inline-button {
+      display: inline-block;
+    }
+
+    .logseq-block-calendar .no-padding-button {
+      padding: 0;
+      height: inherit;
+    }
+    .logseq-block-calendar .padding-button {
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+      height: inherit;
     }
     .logseq-block-calendar tr:nth-child(even) {
       background-color: transparent;
@@ -501,10 +520,6 @@ export function provideStyle(opts: any = {}) {
     .logseq-block-calendar .calendar-head {
       font-weight: bold;
       color: #999999;
-    }
-
-    .logseq-block-calendar {
-      margin: 0;
     }
 
     .logseq-block-calendar a {
