@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.1.12
+
+- fix: some month missing dates
+
 ## v0.1.11
 
 - fix: adjust style

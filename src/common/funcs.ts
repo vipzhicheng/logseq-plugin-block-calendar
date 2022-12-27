@@ -328,7 +328,8 @@ export async function drawCal(
   let digit = 1;
   let curCell = 1;
 
-  for (let row = 1; row <= Math.ceil((lastDate + firstDay - 1) / 7); ++row) {
+  while (true) {
+    if (digit > lastDate) break;
     text += '<tr align="center" valign="top">';
     for (let col = 1; col <= 7; ++col) {
       if (digit > lastDate) break;
