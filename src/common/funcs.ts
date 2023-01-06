@@ -1,5 +1,5 @@
 import "@logseq/libs";
-import { format } from "date-fns";
+import { format, toDate, utcToZonedTime } from "date-fns-tz";
 import dayjs from "dayjs";
 import isToday from "dayjs/plugin/isToday";
 import langs from "../lang";
@@ -346,10 +346,15 @@ export async function drawCal(
         text += `<td></td>`;
         curCell++;
       } else {
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         const journalTitle = format(
           new Date(`${year}-${month + 1}-${digit}`),
-          config.preferredDateFormat
+          config.preferredDateFormat,
+          {
+            timeZone: timezone,
+          }
         );
+
         const recordsClass = "calendar-day-rec";
         const hasJournal =
           logseq.settings?.enableDot && journalDays.includes(digit);

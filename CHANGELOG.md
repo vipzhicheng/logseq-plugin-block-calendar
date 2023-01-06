@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.1.13
+
+- fix: try to fix timezone issue
+
 ## v0.1.12
 
 - fix: some month missing dates

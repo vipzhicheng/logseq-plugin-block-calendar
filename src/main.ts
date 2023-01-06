@@ -197,7 +197,6 @@ const main = async () => {
     }
   });
   logseq.onSettingsChanged(async (newSettings: any, oldSettings: any) => {
-    console.log({ newSettings, oldSettings });
     if (newSettings.alwaysRenderIn !== oldSettings.alwaysRenderIn) {
       await renderAlwaysIn(newSettings.alwaysRenderIn);
     }
