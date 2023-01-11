@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.1.14
+
+- fix: console error
+
 ## v0.1.13
 
 - fix: try to fix timezone issue

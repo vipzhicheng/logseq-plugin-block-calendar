@@ -133,6 +133,13 @@ const main = async () => {
   const renderAlwaysIn = async (containerSelector: string) => {
     const config = await logseq.App.getUserConfigs();
     const calendarPlaceholderId = "calendar-placeholder";
+    const rightSidebarContainerId = "right-sidebar-container";
+    const rightSidebarContainer = top?.document.querySelector(
+      `#${rightSidebarContainerId}`
+    ) as HTMLElement;
+    if (!rightSidebarContainer) {
+      return;
+    }
 
     if (containerSelector && config.enabledJournals) {
       const container = top?.document.querySelector(
@@ -191,8 +198,8 @@ const main = async () => {
       await renderAlwaysIn(logseq.settings?.alwaysRenderIn);
     }, 1000);
   });
-  logseq.App.onSidebarVisibleChanged(async (visible) => {
-    if (visible) {
+  logseq.App.onSidebarVisibleChanged(async (e) => {
+    if (e.visible) {
       await renderAlwaysIn(logseq.settings?.alwaysRenderIn);
     }
   });
