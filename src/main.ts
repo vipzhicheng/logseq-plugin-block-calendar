@@ -130,64 +130,61 @@ const main = async () => {
     }
   });
 
-  const renderAlwaysIn = async (containerSelector: string) => {
-    const config = await logseq.App.getUserConfigs();
+  const renderAlwaysIn = async (containerSelector: string, forceCreateNew: boolean = false) => {
     const calendarPlaceholderId = "calendar-placeholder";
-    const rightSidebarContainerId = "right-sidebar-container";
-    const rightSidebarContainer = top?.document.querySelector(
-      `#${rightSidebarContainerId}`
-    ) as HTMLElement;
-    if (!rightSidebarContainer) {
-      return;
-    }
+    const calendarPlaceholder = top?.document.querySelector(`#${calendarPlaceholderId}`) as HTMLElement;
 
-    if (containerSelector && config.enabledJournals) {
-      const container = top?.document.querySelector(
-        containerSelector
-      ) as HTMLElement;
-      const placeholderExist = top?.document.querySelector(
-        `#${calendarPlaceholderId}`
-      ) as HTMLElement;
-      if (placeholderExist) {
-        placeholderExist.style.display = "block";
-      }
-      if (container && !placeholderExist) {
-        const calendarPlaceholder = top!.document.createElement("div");
-        calendarPlaceholder.id = calendarPlaceholderId;
-        calendarPlaceholder.style.display = "block";
-        container.insertAdjacentElement("afterbegin", calendarPlaceholder);
-      }
+    if (calendarPlaceholder && !forceCreateNew) {
+      // update existed widget in `calendarPlaceholderId`
 
-      const now = new Date();
-      const calendar = await setCal(
-        now.getFullYear(),
-        now.getMonth(),
-        calendarPlaceholderId,
-        logseq.settings?.defaultLanguage,
-        []
-      );
+      calendarPlaceholder.style.display = "none";
+
       logseq.provideUI({
         key: "calendar-widget",
         path: `#${calendarPlaceholderId}`,
         reset: true,
-        template: calendar,
+        template: "",
       });
-    } else {
-      const placeholderExist = top?.document.querySelector(
-        `#${calendarPlaceholderId}`
-      ) as HTMLElement;
-      if (placeholderExist) {
-        placeholderExist.style.display = "none";
-      }
-      if (placeholderExist) {
-        logseq.provideUI({
-          key: "calendar-widget",
-          path: `#${calendarPlaceholderId}`,
-          reset: true,
-          template: "",
-        });
-      }
+
+      return; // no need to create new widget
     }
+    
+    
+    // create new calendar widget in `containerSelector`
+    
+    if (calendarPlaceholder) {
+      calendarPlaceholder.style.display = "none";
+      calendarPlaceholder.remove();
+    }
+    
+    if (!containerSelector) {
+      return;
+    }
+
+    const container = top?.document.querySelector(containerSelector) as HTMLElement;
+    if (!container) {
+      return;
+    }
+   
+    const calendarNewPlaceholder = top!.document.createElement("div");
+    calendarNewPlaceholder.id = calendarPlaceholderId;
+    calendarNewPlaceholder.style.display = "block";
+    container.insertAdjacentElement("afterbegin", calendarNewPlaceholder);
+
+    const now = new Date();
+    const calendar = await setCal(
+      now.getFullYear(),
+      now.getMonth(),
+      calendarPlaceholderId,
+      logseq.settings?.defaultLanguage,
+      []
+    );
+    logseq.provideUI({
+      key: "calendar-widget",
+      path: `#${calendarPlaceholderId}`,
+      reset: true,
+      template: calendar,
+    });
   };
 
   setTimeout(async () => {
@@ -205,7 +202,7 @@ const main = async () => {
   });
   logseq.onSettingsChanged(async (newSettings: any, oldSettings: any) => {
     if (newSettings.alwaysRenderIn !== oldSettings.alwaysRenderIn) {
-      await renderAlwaysIn(newSettings.alwaysRenderIn);
+      await renderAlwaysIn(newSettings.alwaysRenderIn, true);
     }
   });
 
