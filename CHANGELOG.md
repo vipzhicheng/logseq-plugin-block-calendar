@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.1.15
+
+- fix: over fixed console error, change it back
+
 ## v0.1.14
 
 - fix: console error
