@@ -1,6 +1,6 @@
 import "@logseq/libs";
 import { SettingSchemaDesc } from "@logseq/libs/dist/LSPlugin";
-import { setCal, provideStyle, languageMapping } from "./common/funcs";
+import { setCal, provideStyle, languageMapping, getLang } from "./common/funcs";
 import langs from "./lang";
 
 const defineSettings: SettingSchemaDesc[] = [
@@ -69,6 +69,14 @@ const defineSettings: SettingSchemaDesc[] = [
       "Always render calendar in custom HTML element (provide CSS selector: ID or class), Leave empty to disable and input .sidebar-item-list to render calendar at right top in sidebar.",
     default: ".sidebar-item-list",
   },
+  {
+    key: "yearlyColumns",
+    type: "enum",
+    enumChoices: ["2", "3", "4"],
+    title: "",
+    description: "Choose how many columns in yearly view",
+    default: "3",
+  },
 ];
 
 logseq.useSettingsSchema(defineSettings);
@@ -114,8 +122,9 @@ const main = async () => {
   });
 
   logseq.App.onMacroRendererSlotted(async ({ slot, payload }) => {
-    let [type, year, month, lang, ...options] = payload.arguments;
+    let [type] = payload.arguments;
     if (type === "block-calendar") {
+      let [_, year, month, lang, ...options] = payload.arguments;
       const now = new Date();
       const year4 = year ? Number(year) : now.getFullYear();
       const month0 = month ? Number(month) - 1 : now.getMonth();
@@ -126,6 +135,44 @@ const main = async () => {
         slot,
         reset: true,
         template: calendar,
+      });
+    } else if (type === "block-calendar-yearly") {
+      let [_, year] = payload.arguments;
+      const language = logseq.settings?.defaultLanguage;
+      const lang = await getLang(language);
+      const now = new Date();
+      const year4 = year ? Number(year) : now.getFullYear();
+      let monthView = "";
+      for (let month0 of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]) {
+        const calendar = await setCal(year4, month0, slot, "", [
+          "nonav",
+          "noyear",
+        ]);
+        monthView += calendar;
+      }
+      const header = `<div class="header"><span class="calendar-title">2023</span><div class="controls">
+      <a class="button inline-button no-padding-button" data-year="${
+        now.getFullYear() - 1
+      }" data-slot="${slot}" data-on-click="loadCalendarYearly" title="Jump to previous year."><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-left inline-block" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <polyline points="15 6 9 12 15 18" />
+    </svg></a> <a class="button inline-button padding-button" data-year="${now.getFullYear()}" data-slot="${slot}" data-on-click="loadCalendarYearly" title="Jump back to current year.">${
+        lang.Today
+      }</a> <a class="button inline-button no-padding-button" data-year="${
+        now.getFullYear() + 1
+      }" data-slot="${slot}" data-on-click="loadCalendarYearly" title="Jump to next year"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-right inline-block" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <polyline points="9 6 15 12 9 18" />
+    </svg></a>
+      </div></div>`;
+
+      const template = `${header}<div class="yearly-months">${monthView}</div>`;
+
+      logseq.provideUI({
+        key: "block-calendar-yearly-" + slot,
+        slot,
+        reset: true,
+        template: template,
       });
     }
   });
