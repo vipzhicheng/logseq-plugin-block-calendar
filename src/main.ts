@@ -119,6 +119,48 @@ const main = async () => {
         });
       }
     },
+
+    async loadCalendarYearly(e: any) {
+      let { year, slot, language, options } = e.dataset;
+      if (year) {
+        language = language || logseq.settings?.defaultLanguage;
+        const lang = await getLang(language);
+        const now = new Date();
+        const year4 = year ? Number(year) : now.getFullYear();
+        let monthView = "";
+        for (let month0 of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]) {
+          const calendar = await setCal(year4, month0, slot, language, [
+            "nonav",
+            "noyear",
+          ]);
+          monthView += calendar;
+        }
+        const header = `<div class="header"><span class="calendar-title">${year4}</span><div class="controls">
+      <a class="button inline-button no-padding-button" data-year="${
+        year4 - 1
+      }" data-slot="${slot}" data-language="${language}" data-on-click="loadCalendarYearly" title="Jump to previous year."><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-left inline-block" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <polyline points="15 6 9 12 15 18" />
+    </svg></a> <a class="button inline-button padding-button" data-year="${now.getFullYear()}" data-slot="${slot}" data-language="${language}" data-on-click="loadCalendarYearly" title="Jump back to current year.">${
+          lang.Today
+        }</a> <a class="button inline-button no-padding-button" data-year="${
+          year4 + 1
+        }" data-slot="${slot}" data-language="${language}" data-on-click="loadCalendarYearly" title="Jump to next year"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-right inline-block" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <polyline points="9 6 15 12 9 18" />
+    </svg></a>
+      </div></div>`;
+
+        const template = `${header}<div class="yearly-months">${monthView}</div>`;
+
+        logseq.provideUI({
+          key: "block-calendar-yearly-" + slot,
+          slot,
+          reset: true,
+          template: template,
+        });
+      }
+    },
   });
 
   logseq.App.onMacroRendererSlotted(async ({ slot, payload }) => {
@@ -137,29 +179,29 @@ const main = async () => {
         template: calendar,
       });
     } else if (type === "block-calendar-yearly") {
-      let [_, year] = payload.arguments;
-      const language = logseq.settings?.defaultLanguage;
+      let [_, year, language] = payload.arguments;
+      language = language || logseq.settings?.defaultLanguage;
       const lang = await getLang(language);
       const now = new Date();
       const year4 = year ? Number(year) : now.getFullYear();
       let monthView = "";
       for (let month0 of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]) {
-        const calendar = await setCal(year4, month0, slot, "", [
+        const calendar = await setCal(year4, month0, slot, language, [
           "nonav",
           "noyear",
         ]);
         monthView += calendar;
       }
-      const header = `<div class="header"><span class="calendar-title">2023</span><div class="controls">
+      const header = `<div class="header"><span class="calendar-title">${year4}</span><div class="controls">
       <a class="button inline-button no-padding-button" data-year="${
-        now.getFullYear() - 1
+        year4 - 1
       }" data-slot="${slot}" data-on-click="loadCalendarYearly" title="Jump to previous year."><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-left inline-block" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
       <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
       <polyline points="15 6 9 12 15 18" />
     </svg></a> <a class="button inline-button padding-button" data-year="${now.getFullYear()}" data-slot="${slot}" data-on-click="loadCalendarYearly" title="Jump back to current year.">${
         lang.Today
       }</a> <a class="button inline-button no-padding-button" data-year="${
-        now.getFullYear() + 1
+        year4 + 1
       }" data-slot="${slot}" data-on-click="loadCalendarYearly" title="Jump to next year"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-right inline-block" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
       <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
       <polyline points="9 6 15 12 9 18" />
