@@ -323,11 +323,29 @@ const main = async () => {
     }
     widgetPlaceholder.style.display = "block";
 
-    const now = new Date();
-    const [year4, month0] = parseYearMonth(null, null, new Date());
+    // get widget "<" button
+    const state = widgetPlaceholder?.querySelector(".calendar-nav > a");
+
+    let year = null;
+    let month = null;
+    if (state) {
+      // extract year & month from button
+      year  = state.dataset.year;
+      month = state.dataset.month;
+    }
+
+    let [year4, month0] = parseYearMonth(year, month, new Date);
+
+    if (state) {
+      // it is previous button → so we need to add one month
+      month0++;
+      year4 += (month0 === 12);
+      month0 = (month0 < 12) ? month0 : 0;
+    }
+
     const calendar = await setCal(
-      now.getFullYear(),
-      now.getMonth(),
+      year4,
+      month0,
       calendarWidgetSlot,
       logseq.settings?.defaultLanguage,
       []
