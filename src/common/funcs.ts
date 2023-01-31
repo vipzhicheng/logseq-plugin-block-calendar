@@ -82,7 +82,8 @@ export async function setCal(
   options: string[] = []
 ) {
   clearCachedDays();
-  language = language || logseq.settings?.defaultLanguage;
+  language =
+    language || languageMapping[logseq.settings?.defaultLanguage || "en"];
   const lang = await getLang(language);
   const now = new Date();
   const monthName = await getMonthName(month0, lang);
@@ -112,9 +113,7 @@ export async function setCal(
 export const getLang = async (language: string) => {
   type Lang = keyof typeof langs;
   const lang: Lang = (
-    Object.keys(langs).includes(languageMapping[language])
-      ? languageMapping[language]
-      : "en"
+    Object.keys(langs).includes(language) ? language : "en"
   ) as Lang;
 
   return langs[lang];
@@ -495,8 +494,15 @@ export function provideStyle(opts: any = {}) {
       flex-direction: column;
     }
 
+    [id^="logseq-plugin-block-calendar--block-calendar-yearly-slot"] .logseq-block-calendar:not(:nth-child(${
+      logseq.settings?.yearlyColumns || 3
+    }n)) {
+      border-right: 1px solid #eee;
+    }
+
     [id^="logseq-plugin-block-calendar--block-calendar-yearly-slot"] .inline-button  {
       display: inline-block;
+      height: 2.6rem;
     }
     [id^="logseq-plugin-block-calendar--block-calendar-yearly-slot"] .header  {
       display: flex;
@@ -509,6 +515,7 @@ export function provideStyle(opts: any = {}) {
     [id^="logseq-plugin-block-calendar--block-calendar-yearly-slot"] .calendar-title  {
       font-weight: bold;
       font-size: 1.5em;
+      height: 60px;
     }
 
     [id^="logseq-plugin-block-calendar--block-calendar-yearly-slot"] .yearly-months {
@@ -516,6 +523,7 @@ export function provideStyle(opts: any = {}) {
        grid-template-columns: repeat(${logseq.settings?.yearlyColumns || 3}, ${
       100 / (logseq.settings?.yearlyColumns || 3)
     }%);
+      gap: 10px;
     }
 
     .logseq-block-calendar {
