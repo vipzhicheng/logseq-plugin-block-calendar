@@ -5,10 +5,10 @@
 - fix: language param in macro rendering — `en` & `English` are now both valid
 - fix: calendar widget updated when journal blocks change
 - fix: calendar widget updating when widget is out of right sidebar
-- fix: diabling journals does not imply block calendar disabling
+- fix: disabling journals does not imply block calendar disabling
 
 - refactor: generalize providing calendar UI code
-- refactor: rewrited calandar widget rendering
+- refactor: rewritten calendar widget rendering
 
 ## v0.1.15
 
