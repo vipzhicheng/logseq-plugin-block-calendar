@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## v0.2.0
+
+- fix: language param in macro rendering — `en` & `English` are now both valid
+- fix: calendar widget updated when journal blocks change
+- fix: calendar widget updating when widget is out of right sidebar
+- fix: diabling journals does not imply block calendar disabling
+
+- refactor: generalize providing calendar UI code
+- refactor: rewrited calandar widget rendering
+
 ## v0.1.15
 
 - fix: over fixed console error, change it back
@@ -22,7 +32,7 @@
 
 ## v0.1.10
 
-- fix: wrong calentdar on 2023-01
+- fix: wrong calendar on 2023-01
 
 ## v0.1.9
 
