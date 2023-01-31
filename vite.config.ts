@@ -5,9 +5,10 @@ import logseqPlugin from "vite-plugin-logseq";
 export default defineConfig({
   base: "./",
   build: {
-    // sourcemap: true,
+    sourcemap: true,
     target: "esnext",
-    minify: "esbuild",
+    // minify: "esbuild",
+    minify: false,
   },
   plugins: [logseqPlugin()],
 });

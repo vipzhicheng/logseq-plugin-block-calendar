@@ -9,6 +9,7 @@
 
 - refactor: generalize providing calendar UI code
 - refactor: rewritten calendar widget rendering
+- refactor: generalize lang and date parsing
 
 ## v0.1.15
 
