@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.2.1
+
+- fix: add state to widget so there is no fallback to current month on render
+
+- refactor: generalize lang and date parsing
+
 ## v0.2.0
 
 - fix: language param in macro rendering — `en` & `English` are now both valid

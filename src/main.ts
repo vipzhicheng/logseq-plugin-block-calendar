@@ -1,8 +1,8 @@
 import "@logseq/libs";
 import { SettingSchemaDesc } from "@logseq/libs/dist/LSPlugin";
-import { setCal, provideStyle, languageMapping, getLang, clearCachedDays, print } from "./common/funcs";
-import langs from "./lang";
-import { logseq as logseqPackageSection } from "../package.json";
+
+import { setCal, provideStyle, clearCachedDays, print, parseYearMonth } from "./common/funcs";
+import { englishLanguage, availableLanguages } from "./lang";
 
 
 const defineSettings: SettingSchemaDesc[] = [
@@ -52,9 +52,9 @@ const defineSettings: SettingSchemaDesc[] = [
     key: "defaultLanguage",
     type: "enum",
     title: "Language locale",
-    enumChoices: Object.keys(languageMapping),
+    enumChoices: availableLanguages,
     description: "",
-    default: "en",
+    default: englishLanguage,
   },
   {
     key: "tableWidth",
@@ -66,9 +66,9 @@ const defineSettings: SettingSchemaDesc[] = [
   {
     key: "alwaysRenderIn",
     type: "string",
-    title: "",
+    title: "Widget location (use .sidebar-item-list to locate the right sidebar)",
     description:
-      "Always render calendar in custom HTML element (provide CSS selector: ID or class), Leave empty to disable and input .sidebar-item-list to render calendar at right top in sidebar.",
+      "Always render calendar in custom page location (provide CSS selector: ID or class). Leave empty to disable.",
     default: ".sidebar-item-list",
   },
   {
@@ -125,7 +125,7 @@ function provideCalendarUI(calendar: string, slot: string) {
 
 const main = async () => {
   logseq.Editor.registerSlashCommand("Insert Block Calendar", async () => {
-    await logseq.Editor.insertAtEditingCursor(`{{renderer block-calendar}} `);
+    await logseq.Editor.insertAtEditingCursor("{{renderer block-calendar}}");
   });
 
   logseq.provideModel({
@@ -146,22 +146,18 @@ const main = async () => {
     async loadCalendar(e: any) {
       const { year, month, slot, language, options } = e.dataset;
 
-      if (year && month) {
-        const year4 = Number(year);
-        const month0 = Number(month) - 1;
-
-        const calendar = await setCal(year4, month0, slot, language, options.split(" "));
-        provideCalendarUI(calendar, slot);
-      }
+      const [year4, month0] = parseYearMonth(year, month);
+      const calendar = await setCal(year4, month0, slot, language, options.split(" "));
+      provideCalendarUI(calendar, slot);
     },
 
     async loadCalendarYearly(e: any) {
       let { year, slot, language, uuid, options } = e.dataset;
+
       options = options.split(" ");
-      if (year) {
-        const lang = getLang(language);
-        const now = new Date();
-        const year4 = year ? Number(year) : now.getFullYear();
+      const [year4, _] = parseYearMonth(year, null, new Date());
+
+      if (year4) {
         let monthView = "";
         for (let month0 of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]) {
           const calendar = await setCal(year4, month0, slot, language, [
@@ -214,23 +210,22 @@ const main = async () => {
   logseq.App.onMacroRendererSlotted(async ({ slot, payload }) => {
     let [type] = payload.arguments;
     const uuid = payload.uuid;
+
     if (type === "block-calendar") {
       let [_, year, month, language, ...options] = payload.arguments;
-      const now = new Date();
-      const year4 = year ? Number(year) : now.getFullYear();
-      const month0 = month ? Number(month) - 1 : now.getMonth();
 
+      const [year4, month0] = parseYearMonth(year, month, new Date());
       const calendar = await setCal(year4, month0, slot, language, options);
       provideCalendarUI(calendar, slot);
     }
     else if (type === "block-calendar-yearly") {
       let [_, year, language, ...options] = payload.arguments;
-      const lang = getLang(language);
-      const now = new Date();
-      const year4 = year ? Number(year) : now.getFullYear();
+
+      const [year4, __] = parseYearMonth(year, null, new Date());
+
       let monthView = "";
       for (let month0 of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]) {
-        const calendar = await setCal(year4, month0, slot, lang, [
+        const calendar = await setCal(year4, month0, slot, language, [
           "nonav",
           "noyear",
         ]);
@@ -295,8 +290,6 @@ const main = async () => {
       if (!widgetPlaceholder) {
         return;
       }
-      
-      print("Remove widget placeholder");
 
       widgetPlaceholder.style.display = "none";
       widgetPlaceholder.remove();
@@ -305,18 +298,24 @@ const main = async () => {
 
     if (!containerSelector) {
       remove(widgetPlaceholder);
+      print("Remove calendar widget");
       return;
     }
     
     const container = top?.document.querySelector(containerSelector) as HTMLElement;
     if (!container) {
       remove(widgetPlaceholder);
+      print("Remove calendar widget");
       return;
     }
 
     if (!widgetPlaceholder || recreate) {
-      remove(widgetPlaceholder);
-      print("Create new widget placeholder");
+      if (widgetPlaceholder) {
+        remove(widgetPlaceholder);
+        print("Refresh calendar widget");
+      } else {
+        print("Create calendar widget");
+      }
 
       widgetPlaceholder = top!.document.createElement("div");
       widgetPlaceholder.id = calendarWidgetPlaceholder.slice(1);
@@ -324,10 +323,29 @@ const main = async () => {
     }
     widgetPlaceholder.style.display = "block";
 
-    const now = new Date();
+    // get widget "<" button
+    const state = widgetPlaceholder?.querySelector(".calendar-nav > a");
+
+    let year = null;
+    let month = null;
+    if (state) {
+      // extract year & month from button
+      year  = state.dataset.year;
+      month = state.dataset.month;
+    }
+
+    let [year4, month0] = parseYearMonth(year, month, new Date);
+
+    if (state) {
+      // it is previous button → so we need to add one month
+      month0++;
+      year4 += (month0 === 12);
+      month0 = (month0 < 12) ? month0 : 0;
+    }
+
     const calendar = await setCal(
-      now.getFullYear(),
-      now.getMonth(),
+      year4,
+      month0,
       calendarWidgetSlot,
       logseq.settings?.defaultLanguage,
       []
