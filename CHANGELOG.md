@@ -8,6 +8,8 @@
 
 ## v0.2.0
 
+- feat: add yearly calendar `/Insert Block Yearly Calendar`
+
 - fix: language param in macro rendering — `en` & `English` are now both valid
 - fix: calendar widget updated when journal blocks change
 - fix: calendar widget updating when widget is out of right sidebar

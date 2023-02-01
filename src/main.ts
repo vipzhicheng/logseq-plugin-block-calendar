@@ -1,9 +1,14 @@
 import "@logseq/libs";
 import { SettingSchemaDesc } from "@logseq/libs/dist/LSPlugin";
 
-import { setCal, provideStyle, clearCachedDays, print, parseYearMonth } from "./common/funcs";
+import {
+  clearCachedDays,
+  print,
+  provideStyle,
+  setCal,
+  parseYearMonth,
+} from "./common/funcs";
 import { englishLanguage, availableLanguages } from "./lang";
-
 
 const defineSettings: SettingSchemaDesc[] = [
   {
@@ -93,20 +98,18 @@ logseq.App.onCurrentGraphChanged(() => {
   clearCachedDays();
 });
 
-
 const calendarKeyPrefix = "block-calendar-";
 
 const calendarWidgetSlot = "widget";
 const calendarWidgetKey = calendarKeyPrefix + calendarWidgetSlot;
 const calendarWidgetPlaceholder = `#${calendarWidgetKey}_placeholder`;
 
-
 function provideCalendarUI(calendar: string, slot: string) {
   if (!slot) {
     throw new Error("Attemp to render without slot");
   }
-  
-  const params = {
+
+  const params: any = {
     reset: true,
     template: calendar,
   };
@@ -122,10 +125,13 @@ function provideCalendarUI(calendar: string, slot: string) {
   logseq.provideUI(params);
 }
 
-
 const main = async () => {
   logseq.Editor.registerSlashCommand("Insert Block Calendar", async () => {
     await logseq.Editor.insertAtEditingCursor("{{renderer block-calendar}}");
+  });
+
+  logseq.Editor.registerSlashCommand("Insert Block Yearly Calendar", async () => {
+    await logseq.Editor.insertAtEditingCursor("{{renderer block-calendar-yearly}}");
   });
 
   logseq.provideModel({
@@ -154,7 +160,7 @@ const main = async () => {
     async loadCalendarYearly(e: any) {
       let { year, slot, language, uuid, options } = e.dataset;
 
-      options = options.split(" ");
+      options = options ? options.split(" ") : [];
       const [year4, _] = parseYearMonth(year, null, new Date());
 
       if (year4) {
@@ -166,7 +172,7 @@ const main = async () => {
           ]);
           monthView += calendar;
         }
-        let header = `<div class="header"><span class="calendar-title">${year4}</span><div class="controls">
+        let header = `<div class="header"><span class="calendar-header-title">${year4}</span><div class="controls">
         <a class="button inline-button no-padding-button" data-uuid="${uuid}" data-on-click="editBlock"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-pencil inline-block" width="20" height="20" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
           <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
           <path d="M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4" />
@@ -231,7 +237,7 @@ const main = async () => {
         ]);
         monthView += calendar;
       }
-      let header = `<div class="header"><span class="calendar-title">${year4}</span><div class="controls">
+      let header = `<div class="header"><span class="calendar-header-title">${year4}</span><div class="controls">
       <a class="button inline-button no-padding-button" data-uuid="${uuid}" data-on-click="editBlock"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-pencil inline-block" width="20" height="20" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
           <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
           <path d="M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4" />
@@ -283,10 +289,15 @@ const main = async () => {
     }
   });
 
-  const renderAlwaysIn = async (containerSelector: string, recreate: boolean = false) => {
-    let widgetPlaceholder = top?.document.querySelector(`${calendarWidgetPlaceholder}`) as HTMLElement;
+  const renderAlwaysIn = async (
+    containerSelector: string,
+    recreate: boolean = false
+  ) => {
+    let widgetPlaceholder = top?.document.querySelector(
+      `${calendarWidgetPlaceholder}`
+    ) as HTMLElement;
 
-    const remove = (widgetPlaceholder) => {
+    const remove = (widgetPlaceholder: any) => {
       if (!widgetPlaceholder) {
         return;
       }
@@ -301,8 +312,10 @@ const main = async () => {
       print("Remove calendar widget");
       return;
     }
-    
-    const container = top?.document.querySelector(containerSelector) as HTMLElement;
+
+    const container = top?.document.querySelector(
+      containerSelector
+    ) as HTMLElement;
     if (!container) {
       remove(widgetPlaceholder);
       print("Remove calendar widget");
@@ -381,7 +394,7 @@ const main = async () => {
     }
   });
 
-  logseq.DB.onChanged(async ({blocks, txData, txMeta}) => {
+  logseq.DB.onChanged(async ({ blocks, txData, txMeta }) => {
     for (const block of blocks) {
       if (block.journalDay) {
         await renderAlwaysIn(logseq.settings?.alwaysRenderIn);
