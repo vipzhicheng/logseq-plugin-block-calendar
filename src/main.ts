@@ -1,7 +1,9 @@
 import "@logseq/libs";
 import { SettingSchemaDesc } from "@logseq/libs/dist/LSPlugin";
-import { setCal, provideStyle, languageMapping, getLang } from "./common/funcs";
+import { setCal, provideStyle, languageMapping, getLang, clearCachedDays, print } from "./common/funcs";
 import langs from "./lang";
+import { logseq as logseqPackageSection } from "../package.json";
+
 
 const defineSettings: SettingSchemaDesc[] = [
   {
@@ -84,6 +86,43 @@ logseq.onSettingsChanged(() => {
   provideStyle();
 });
 
+logseq.App.onGraphAfterIndexed(() => {
+  clearCachedDays();
+});
+logseq.App.onCurrentGraphChanged(() => {
+  clearCachedDays();
+});
+
+
+const calendarKeyPrefix = "block-calendar-";
+
+const calendarWidgetSlot = "widget";
+const calendarWidgetKey = calendarKeyPrefix + calendarWidgetSlot;
+const calendarWidgetPlaceholder = `#${calendarWidgetKey}_placeholder`;
+
+
+function provideCalendarUI(calendar: string, slot: string) {
+  if (!slot) {
+    throw new Error("Attemp to render without slot");
+  }
+  
+  const params = {
+    reset: true,
+    template: calendar,
+  };
+
+  if (slot === calendarWidgetSlot) {
+    params.key = calendarWidgetKey;
+    params.path = calendarWidgetPlaceholder;
+  } else {
+    params.key = calendarKeyPrefix + slot;
+    params.slot = slot;
+  }
+
+  logseq.provideUI(params);
+}
+
+
 const main = async () => {
   logseq.Editor.registerSlashCommand("Insert Block Calendar", async () => {
     await logseq.Editor.insertAtEditingCursor(`{{renderer block-calendar}} `);
@@ -106,22 +145,13 @@ const main = async () => {
 
     async loadCalendar(e: any) {
       const { year, month, slot, language, options } = e.dataset;
+
       if (year && month) {
         const year4 = Number(year);
         const month0 = Number(month) - 1;
-        const calendar = await setCal(
-          year4,
-          month0,
-          slot,
-          language,
-          options.split(" ")
-        );
-        logseq.provideUI({
-          key: "block-calendar-" + slot,
-          slot,
-          reset: true,
-          template: calendar,
-        });
+
+        const calendar = await setCal(year4, month0, slot, language, options.split(" "));
+        provideCalendarUI(calendar, slot);
       }
     },
 
@@ -129,9 +159,7 @@ const main = async () => {
       let { year, slot, language, uuid, options } = e.dataset;
       options = options.split(" ");
       if (year) {
-        language =
-          language || languageMapping[logseq.settings?.defaultLanguage || "en"];
-        const lang = await getLang(language);
+        const lang = getLang(language);
         const now = new Date();
         const year4 = year ? Number(year) : now.getFullYear();
         let monthView = "";
@@ -175,7 +203,7 @@ const main = async () => {
 
         logseq.provideUI({
           key: "block-calendar-yearly-" + slot,
-          slot,
+          slot: slot,
           reset: true,
           template: template,
         });
@@ -187,28 +215,22 @@ const main = async () => {
     let [type] = payload.arguments;
     const uuid = payload.uuid;
     if (type === "block-calendar") {
-      let [_, year, month, lang, ...options] = payload.arguments;
+      let [_, year, month, language, ...options] = payload.arguments;
       const now = new Date();
       const year4 = year ? Number(year) : now.getFullYear();
       const month0 = month ? Number(month) - 1 : now.getMonth();
 
-      const calendar = await setCal(year4, month0, slot, lang, options);
-      logseq.provideUI({
-        key: "block-calendar-" + slot,
-        slot,
-        reset: true,
-        template: calendar,
-      });
-    } else if (type === "block-calendar-yearly") {
+      const calendar = await setCal(year4, month0, slot, language, options);
+      provideCalendarUI(calendar, slot);
+    }
+    else if (type === "block-calendar-yearly") {
       let [_, year, language, ...options] = payload.arguments;
-      language =
-        language || languageMapping[logseq.settings?.defaultLanguage || "en"];
-      const lang = await getLang(language);
+      const lang = getLang(language);
       const now = new Date();
       const year4 = year ? Number(year) : now.getFullYear();
       let monthView = "";
       for (let month0 of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]) {
-        const calendar = await setCal(year4, month0, slot, language, [
+        const calendar = await setCal(year4, month0, slot, lang, [
           "nonav",
           "noyear",
         ]);
@@ -259,82 +281,94 @@ const main = async () => {
 
       logseq.provideUI({
         key: "block-calendar-yearly-" + slot,
-        slot,
+        slot: slot,
         reset: true,
         template: template,
       });
     }
   });
 
-  const renderAlwaysIn = async (containerSelector: string) => {
-    const config = await logseq.App.getUserConfigs();
-    const calendarPlaceholderId = "calendar-placeholder";
+  const renderAlwaysIn = async (containerSelector: string, recreate: boolean = false) => {
+    let widgetPlaceholder = top?.document.querySelector(`${calendarWidgetPlaceholder}`) as HTMLElement;
 
-    if (containerSelector && config.enabledJournals) {
-      const container = top?.document.querySelector(
-        containerSelector
-      ) as HTMLElement;
-      const placeholderExist = top?.document.querySelector(
-        `#${calendarPlaceholderId}`
-      ) as HTMLElement;
-      if (placeholderExist) {
-        placeholderExist.style.display = "block";
+    const remove = (widgetPlaceholder) => {
+      if (!widgetPlaceholder) {
+        return;
       }
-      if (container && !placeholderExist) {
-        const calendarPlaceholder = top!.document.createElement("div");
-        calendarPlaceholder.id = calendarPlaceholderId;
-        calendarPlaceholder.style.display = "block";
-        container.insertAdjacentElement("afterbegin", calendarPlaceholder);
-      }
+      
+      print("Remove widget placeholder");
 
-      const now = new Date();
-      const calendar = await setCal(
-        now.getFullYear(),
-        now.getMonth(),
-        calendarPlaceholderId,
-        logseq.settings?.defaultLanguage,
-        []
-      );
-      logseq.provideUI({
-        key: "calendar-widget",
-        path: `#${calendarPlaceholderId}`,
-        reset: true,
-        template: calendar,
-      });
-    } else {
-      const placeholderExist = top?.document.querySelector(
-        `#${calendarPlaceholderId}`
-      ) as HTMLElement;
-      if (placeholderExist) {
-        placeholderExist.style.display = "none";
-      }
-      if (placeholderExist) {
-        logseq.provideUI({
-          key: "calendar-widget",
-          path: `#${calendarPlaceholderId}`,
-          reset: true,
-          template: "",
-        });
-      }
+      widgetPlaceholder.style.display = "none";
+      widgetPlaceholder.remove();
+      widgetPlaceholder = null;
+    };
+
+    if (!containerSelector) {
+      remove(widgetPlaceholder);
+      return;
     }
+    
+    const container = top?.document.querySelector(containerSelector) as HTMLElement;
+    if (!container) {
+      remove(widgetPlaceholder);
+      return;
+    }
+
+    if (!widgetPlaceholder || recreate) {
+      remove(widgetPlaceholder);
+      print("Create new widget placeholder");
+
+      widgetPlaceholder = top!.document.createElement("div");
+      widgetPlaceholder.id = calendarWidgetPlaceholder.slice(1);
+      container.insertAdjacentElement("afterbegin", widgetPlaceholder);
+    }
+    widgetPlaceholder.style.display = "block";
+
+    const now = new Date();
+    const calendar = await setCal(
+      now.getFullYear(),
+      now.getMonth(),
+      calendarWidgetSlot,
+      logseq.settings?.defaultLanguage,
+      []
+    );
+    provideCalendarUI(calendar, calendarWidgetSlot);
   };
 
   setTimeout(async () => {
     await renderAlwaysIn(logseq.settings?.alwaysRenderIn);
   }, 1000);
+
+  logseq.App.onGraphAfterIndexed(() => {
+    setTimeout(async () => {
+      await renderAlwaysIn(logseq.settings?.alwaysRenderIn);
+    }, 1000);
+  });
+
   logseq.App.onCurrentGraphChanged(() => {
     setTimeout(async () => {
       await renderAlwaysIn(logseq.settings?.alwaysRenderIn);
     }, 1000);
   });
+
   logseq.App.onSidebarVisibleChanged(async (e) => {
     if (e.visible) {
       await renderAlwaysIn(logseq.settings?.alwaysRenderIn);
     }
   });
+
   logseq.onSettingsChanged(async (newSettings: any, oldSettings: any) => {
     if (newSettings.alwaysRenderIn !== oldSettings.alwaysRenderIn) {
-      await renderAlwaysIn(newSettings.alwaysRenderIn);
+      await renderAlwaysIn(newSettings.alwaysRenderIn, true);
+    }
+  });
+
+  logseq.DB.onChanged(async ({blocks, txData, txMeta}) => {
+    for (const block of blocks) {
+      if (block.journalDay) {
+        await renderAlwaysIn(logseq.settings?.alwaysRenderIn);
+        return;
+      }
     }
   });
 

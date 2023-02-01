@@ -26,6 +26,10 @@ export const languageMapping: {
   한국어: "ko",
 };
 
+export function print(msg) {
+  console.info(`#${logseq.baseInfo.id}: ${msg}`);
+}
+
 function leapYear(year: number) {
   if (year % 4 == 0)
     // basic rule
@@ -54,7 +58,7 @@ function getDays(month: number, year: number) {
   return ar[month];
 }
 
-async function getMonthName(month: number, lang: any) {
+function getMonthName(month: number, lang: any) {
   // create array to hold name of each month
   const ar = new Array(12);
   ar[0] = lang.January;
@@ -82,11 +86,9 @@ export async function setCal(
   options: string[] = []
 ) {
   clearCachedDays();
-  language =
-    language || languageMapping[logseq.settings?.defaultLanguage || "en"];
-  const lang = await getLang(language);
+  const lang = getLang(language);
   const now = new Date();
-  const monthName = await getMonthName(month0, lang);
+  const monthName = getMonthName(month0, lang);
   const date = now.getDate();
   // create instance of first day of month, and extract the day on which it occurs
   const firstDayInstance = new Date(year4, month0, 1);
@@ -110,14 +112,19 @@ export async function setCal(
   );
 }
 
-export const getLang = async (language: string) => {
-  type Lang = keyof typeof langs;
-  const lang: Lang = (
-    Object.keys(langs).includes(language) ? language : "en"
-  ) as Lang;
+export function getLang(language: string) {
+  let lang = language;
+
+  if (Object.keys(langs).includes(languageMapping[lang])) {
+    lang = languageMapping[lang];
+  }
+
+  if (!Object.keys(langs).includes(lang)) {
+    lang = languageMapping[logseq.settings?.defaultLanguage];
+  }
 
   return langs[lang];
-};
+}
 
 let journalDays: number[] = [];
 async function getJournalDays(year: number, month: number) {
@@ -208,10 +215,6 @@ export function clearCachedDays() {
   undoneTaskDays = [];
   doneTaskDays = [];
 }
-
-logseq.App.onCurrentGraphChanged(() => {
-  clearCachedDays();
-});
 
 export async function drawCal(
   firstDay: number,
@@ -635,7 +638,7 @@ export function provideStyle(opts: any = {}) {
       margin: auto;
       border-radius: 100%;
     }
-    #right-sidebar-container #calendar-placeholder {
+    #right-sidebar-container #block-calendar-widget_placeholder {
       padding: 6px 16px 6px 12px;
     }
     `,

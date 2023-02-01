@@ -16,10 +16,11 @@ A plugin to render a calendar in block, so you can put it onto right side bar.
 
 ## Usage
 
-- Slash command `/Insert Block Calendar`  to insert a calendar
-- `{{renderer block-calendar, [2022], [7], [en], [nohead|nonav]}}`
-  - `[2022]`, `[7]`, `[en]` is optional.
-  - Only support `zh-CN` and `en` language, PR is welcome.
+- Slash command `/Insert Block Calendar` to insert a calendar for current month
+- `{{renderer block-calendar, 2022, 7}}` to insert a calendar for specified month and year
+- `{{renderer block-calendar, 2022, 7, en}}` to insert a calendar for specified language
+  - Supported languages: `en`, `fr`, `de`,  `zh-CN`, `zh-Hant`, `af`,  `es`,  `nb-NO`,  `pt-BR`,  `pt-PT`,  `ru`,  `ja`,  `it`,  `tr`,  `ko`
+- `{{renderer block-calendar, 2022, 7, en, nohead|nonav}}`
   - `nohead` means do not have table head, so no month and year and month switcher.
   - `nonav` means still have month and year, but no month switcher.
 
