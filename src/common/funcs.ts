@@ -26,7 +26,7 @@ export const languageMapping: {
   한국어: "ko",
 };
 
-export function print(msg) {
+export function print(msg: string) {
   console.info(`#${logseq.baseInfo.id}: ${msg}`);
 }
 
@@ -123,7 +123,7 @@ export function getLang(language: string) {
     lang = languageMapping[logseq.settings?.defaultLanguage];
   }
 
-  return langs[lang];
+  return langs[lang as keyof typeof langs];
 }
 
 let journalDays: number[] = [];
@@ -503,7 +503,7 @@ export function provideStyle(opts: any = {}) {
       border-right: 1px solid #eee;
     }
 
-    [id^="logseq-plugin-block-calendar--block-calendar-yearly-slot"] .inline-button  {
+    [id^="logseq-plugin-block-calendar--block-calendar-yearly-slot"] .header .inline-button  {
       display: inline-block;
       height: 2.6rem;
     }
@@ -515,10 +515,16 @@ export function provideStyle(opts: any = {}) {
     [id^="logseq-plugin-block-calendar--block-calendar-yearly-slot"] .controls  {
       display: flex;
     }
-    [id^="logseq-plugin-block-calendar--block-calendar-yearly-slot"] .calendar-title  {
+    [id^="logseq-plugin-block-calendar--block-calendar-yearly-slot"] .calendar-header-title  {
       font-weight: bold;
       font-size: 1.5em;
       height: 60px;
+    }
+
+    [id^="logseq-plugin-block-calendar--block-calendar-yearly-slot"] .logseq-block-calendar .calendar-title  {
+      font-weight: bold;
+      font-size: 1em;
+      height: 40px;
     }
 
     [id^="logseq-plugin-block-calendar--block-calendar-yearly-slot"] .yearly-months {

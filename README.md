@@ -9,9 +9,12 @@ A plugin to render a calendar in block, so you can put it onto right side bar.
 ## Features
 
 * Click date to jump to journal page.
-* Switch month back and forth.
-* Set back to today's month.
+* Month calendar: Switch month back and forth.
+  * Back to today's month.
+* Yearly calendar: Switch year back and forth.
+  * Back to today's year.
 * Show if journal page exist by showing a red dot.
+* Show if task exists and finished on journal day.
 * Support setting first day of week.
 
 ## Usage
@@ -20,9 +23,19 @@ A plugin to render a calendar in block, so you can put it onto right side bar.
 - `{{renderer block-calendar, 2022, 7}}` to insert a calendar for specified month and year
 - `{{renderer block-calendar, 2022, 7, en}}` to insert a calendar for specified language
   - Supported languages: `en`, `fr`, `de`,  `zh-CN`, `zh-Hant`, `af`,  `es`,  `nb-NO`,  `pt-BR`,  `pt-PT`,  `ru`,  `ja`,  `it`,  `tr`,  `ko`
-- `{{renderer block-calendar, 2022, 7, en, nohead|nonav}}`
+- `{{renderer block-calendar, 2022, 7, en, nohead|nonav|noyear}}`
   - `nohead` means do not have table head, so no month and year and month switcher.
   - `nonav` means still have month and year, but no month switcher.
+  - `noyear` means have month but not year.
+  - `{{renderer block-calendar, 2022, 7, en, nonav, noyear}}` also works.
+
+- Slash command `/Insert Block Yearly Calendar` to insert a yearly calendar for current year
+- `{{renderer block-calendar-yearly, 2022}}` to insert a calendar for specified year
+- `{{renderer block-calendar-yearly, 2022, en}}` to insert a calendar for specified language
+  - Supported languages: `en`, `fr`, `de`,  `zh-CN`, `zh-Hant`, `af`,  `es`,  `nb-NO`,  `pt-BR`,  `pt-PT`,  `ru`,  `ja`,  `it`,  `tr`,  `ko`
+- `{{renderer block-calendar, 2022, en, nohead|nonav}}`
+  - `nohead` means do not have table head, so no month and year switcher.
+  - `nonav` means still have year, but no year switcher.
 
 ## ❤️ Buy me a coffee
 

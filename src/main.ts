@@ -1,9 +1,13 @@
 import "@logseq/libs";
 import { SettingSchemaDesc } from "@logseq/libs/dist/LSPlugin";
-import { setCal, provideStyle, languageMapping, getLang, clearCachedDays, print } from "./common/funcs";
-import langs from "./lang";
-import { logseq as logseqPackageSection } from "../package.json";
-
+import {
+  clearCachedDays,
+  getLang,
+  languageMapping,
+  print,
+  provideStyle,
+  setCal,
+} from "./common/funcs";
 
 const defineSettings: SettingSchemaDesc[] = [
   {
@@ -93,20 +97,18 @@ logseq.App.onCurrentGraphChanged(() => {
   clearCachedDays();
 });
 
-
 const calendarKeyPrefix = "block-calendar-";
 
 const calendarWidgetSlot = "widget";
 const calendarWidgetKey = calendarKeyPrefix + calendarWidgetSlot;
 const calendarWidgetPlaceholder = `#${calendarWidgetKey}_placeholder`;
 
-
 function provideCalendarUI(calendar: string, slot: string) {
   if (!slot) {
     throw new Error("Attemp to render without slot");
   }
-  
-  const params = {
+
+  const params: any = {
     reset: true,
     template: calendar,
   };
@@ -122,11 +124,19 @@ function provideCalendarUI(calendar: string, slot: string) {
   logseq.provideUI(params);
 }
 
-
 const main = async () => {
   logseq.Editor.registerSlashCommand("Insert Block Calendar", async () => {
     await logseq.Editor.insertAtEditingCursor(`{{renderer block-calendar}} `);
   });
+
+  logseq.Editor.registerSlashCommand(
+    "Insert Block Yearly Calendar",
+    async () => {
+      await logseq.Editor.insertAtEditingCursor(
+        `{{renderer block-calendar-yearly}} `
+      );
+    }
+  );
 
   logseq.provideModel({
     async editBlock(e: any) {
@@ -150,14 +160,20 @@ const main = async () => {
         const year4 = Number(year);
         const month0 = Number(month) - 1;
 
-        const calendar = await setCal(year4, month0, slot, language, options.split(" "));
+        const calendar = await setCal(
+          year4,
+          month0,
+          slot,
+          language,
+          options.split(" ")
+        );
         provideCalendarUI(calendar, slot);
       }
     },
 
     async loadCalendarYearly(e: any) {
       let { year, slot, language, uuid, options } = e.dataset;
-      options = options.split(" ");
+      options = options ? options.split(" ") : [];
       if (year) {
         const lang = getLang(language);
         const now = new Date();
@@ -170,7 +186,7 @@ const main = async () => {
           ]);
           monthView += calendar;
         }
-        let header = `<div class="header"><span class="calendar-title">${year4}</span><div class="controls">
+        let header = `<div class="header"><span class="calendar-header-title">${year4}</span><div class="controls">
         <a class="button inline-button no-padding-button" data-uuid="${uuid}" data-on-click="editBlock"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-pencil inline-block" width="20" height="20" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
           <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
           <path d="M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4" />
@@ -222,21 +238,20 @@ const main = async () => {
 
       const calendar = await setCal(year4, month0, slot, language, options);
       provideCalendarUI(calendar, slot);
-    }
-    else if (type === "block-calendar-yearly") {
+    } else if (type === "block-calendar-yearly") {
       let [_, year, language, ...options] = payload.arguments;
       const lang = getLang(language);
       const now = new Date();
       const year4 = year ? Number(year) : now.getFullYear();
       let monthView = "";
       for (let month0 of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]) {
-        const calendar = await setCal(year4, month0, slot, lang, [
+        const calendar = await setCal(year4, month0, slot, language, [
           "nonav",
           "noyear",
         ]);
         monthView += calendar;
       }
-      let header = `<div class="header"><span class="calendar-title">${year4}</span><div class="controls">
+      let header = `<div class="header"><span class="calendar-header-title">${year4}</span><div class="controls">
       <a class="button inline-button no-padding-button" data-uuid="${uuid}" data-on-click="editBlock"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-pencil inline-block" width="20" height="20" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
           <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
           <path d="M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4" />
@@ -288,14 +303,19 @@ const main = async () => {
     }
   });
 
-  const renderAlwaysIn = async (containerSelector: string, recreate: boolean = false) => {
-    let widgetPlaceholder = top?.document.querySelector(`${calendarWidgetPlaceholder}`) as HTMLElement;
+  const renderAlwaysIn = async (
+    containerSelector: string,
+    recreate: boolean = false
+  ) => {
+    let widgetPlaceholder = top?.document.querySelector(
+      `${calendarWidgetPlaceholder}`
+    ) as HTMLElement;
 
-    const remove = (widgetPlaceholder) => {
+    const remove = (widgetPlaceholder: any) => {
       if (!widgetPlaceholder) {
         return;
       }
-      
+
       print("Remove widget placeholder");
 
       widgetPlaceholder.style.display = "none";
@@ -307,8 +327,10 @@ const main = async () => {
       remove(widgetPlaceholder);
       return;
     }
-    
-    const container = top?.document.querySelector(containerSelector) as HTMLElement;
+
+    const container = top?.document.querySelector(
+      containerSelector
+    ) as HTMLElement;
     if (!container) {
       remove(widgetPlaceholder);
       return;
@@ -363,7 +385,7 @@ const main = async () => {
     }
   });
 
-  logseq.DB.onChanged(async ({blocks, txData, txMeta}) => {
+  logseq.DB.onChanged(async ({ blocks, txData, txMeta }) => {
     for (const block of blocks) {
       if (block.journalDay) {
         await renderAlwaysIn(logseq.settings?.alwaysRenderIn);
