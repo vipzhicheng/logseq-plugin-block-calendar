@@ -4,7 +4,10 @@
 
 - fix: add state to widget so there is no fallback to current month on render
 
+- feature: add various ways to set render options
+
 - refactor: generalize lang and date parsing
+- refactor: clean code duplications & align html templates
 
 ## v0.2.0
 

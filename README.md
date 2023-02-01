@@ -16,7 +16,7 @@ A plugin to render a calendar in block, so you can put it onto right side bar.
 * Show if journal page exist by showing a red dot.
 * Show if task exists and finished on journal day.
 * Support setting first day of week.
-* Supported languages: `en`, `fr`, `de`,  `zh-CN`, `zh-Hant`, `af`,  `es`,  `nb-NO`,  `pt-BR`,  `pt-PT`,  `ru`,  `ja`,  `it`,  `tr`,  `ko`.
+* Supported languages: `en`, `fr`, `de`, `zh-CN`, `zh-Hant`, `af`, `es`, `nb-NO`, `pt-BR`, `pt-PT`, `ru`, `ja`, `it`, `tr`, `ko`.
 
 ## Usage
 
@@ -27,7 +27,12 @@ A plugin to render a calendar in block, so you can put it onto right side bar.
   - `nohead` means do not have table head, so no month and year and month switcher.
   - `nonav` means still have month and year, but no month switcher.
   - `noyear` means have month but not year.
-  - `{{renderer block-calendar, 2022, 7, en, nonav, noyear}}` also works.
+  - These options could be set in various ways:
+    - `nohead|nonav|noyear`
+    - `nohead | nonav | noyear`
+    - `nohead nonav noyear`
+    - `nohead:nonav:noyear`
+    - `nohead, nonav, noyear`
 
 - Slash command `/Insert Block Yearly Calendar` to insert a yearly calendar for current year
 - `{{renderer block-calendar-yearly, 2022}}` to insert a calendar for specified year
