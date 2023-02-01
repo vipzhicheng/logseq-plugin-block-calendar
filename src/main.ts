@@ -186,8 +186,8 @@ const main = async () => {
         }" data-slot="${slot}" data-uuid="${uuid}" data-language="${language}" data-on-click="loadCalendarYearly" title="Jump to previous year."><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-left inline-block" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
         <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
         <polyline points="15 6 9 12 15 18" />
-      </svg></a> <a class="button inline-button padding-button" data-year="${now.getFullYear()}" data-slot="${slot}" data-uuid="${uuid}" data-language="${language}" data-on-click="loadCalendarYearly" title="Jump back to current year.">${
-            lang.Today
+      </svg></a> <a class="button inline-button padding-button" data-year="${year4}" data-slot="${slot}" data-uuid="${uuid}" data-language="${language}" data-on-click="loadCalendarYearly" title="Jump back to current year.">${
+            "Today"
           }</a> <a class="button inline-button no-padding-button" data-year="${
             year4 + 1
           }" data-slot="${slot}" data-uuid="${uuid}" data-language="${language}" data-on-click="loadCalendarYearly" title="Jump to next year"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-right inline-block" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -255,12 +255,12 @@ const main = async () => {
         )}" title="Jump to previous year."><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-left inline-block" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
         <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
         <polyline points="15 6 9 12 15 18" />
-      </svg></a> <a class="button inline-button padding-button" data-year="${now.getFullYear()}" data-language="${language}" data-slot="${slot}" data-uuid="${uuid}" data-on-click="loadCalendarYearly" data-options="${options.join(
+      </svg></a> <a class="button inline-button padding-button" data-year="${year4}" data-language="${language}" data-slot="${slot}" data-uuid="${uuid}" data-on-click="loadCalendarYearly" data-options="${options.join(
           " "
         )}" data-options="${options.join(
           " "
         )}" title="Jump back to current year.">${
-          lang.Today
+          "Today"
         }</a> <a class="button inline-button no-padding-button" data-year="${
           year4 + 1
         }" data-language="${language}" data-slot="${slot}" data-uuid="${uuid}" data-on-click="loadCalendarYearly" data-options="${options.join(
@@ -337,7 +337,7 @@ const main = async () => {
     widgetPlaceholder.style.display = "block";
 
     // get widget "<" button
-    const state = widgetPlaceholder?.querySelector(".calendar-nav > a");
+    const state = widgetPlaceholder.querySelector(".calendar-nav > a");
 
     let year = null;
     let month = null;
@@ -352,8 +352,10 @@ const main = async () => {
     if (state) {
       // it is previous button → so we need to add one month
       month0++;
-      year4 += (month0 === 12);
-      month0 = (month0 < 12) ? month0 : 0;
+      if (month0 === 12) {
+        year4++;
+        month0 = 0;
+      }
     }
 
     const calendar = await setCal(
