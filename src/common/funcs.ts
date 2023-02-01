@@ -71,6 +71,23 @@ export function parseYearMonth(year, month, now: Date = null) {
   return [year4, month0];
 }
 
+export function parseOptions(arr: string | string[], delimeters: string = " |:"): string[] {
+  if (Array.isArray(arr)) {
+    if (arr.length !== 1) {
+      return arr;
+    }
+    
+    [arr] = arr;
+  }
+
+  let options: string = arr || "";
+  if (!options) {
+    return [];
+  }
+
+  return options.split(new RegExp(`[${delimeters}]+`));
+}
+
 export async function setCal(
   year4: number,
   month0: number,

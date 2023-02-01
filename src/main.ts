@@ -7,8 +7,10 @@ import {
   provideStyle,
   setCal,
   parseYearMonth,
+  parseOptions,
 } from "./common/funcs";
-import { englishLanguage, availableLanguages } from "./lang";
+import getLangFunc from "./lang";
+import { englishLanguage, availableLanguages, Lang } from "./lang";
 
 const defineSettings: SettingSchemaDesc[] = [
   {
@@ -104,6 +106,43 @@ const calendarWidgetSlot = "widget";
 const calendarWidgetKey = calendarKeyPrefix + calendarWidgetSlot;
 const calendarWidgetPlaceholder = `#${calendarWidgetKey}_placeholder`;
 
+const leftArrowIcon = `
+  <svg xmlns="http://www.w3.org/2000/svg"
+       class="icon icon-tabler icon-tabler-chevron-left inline-block"
+       width="20" height="20" viewBox="0 0 24 24"
+       fill="none" stroke="currentColor"
+       stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+       >
+    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+    <polyline points="15 6 9 12 15 18" />
+  </svg>
+`.trim();
+
+const rightArrowIcon = `
+  <svg xmlns="http://www.w3.org/2000/svg"
+       class="icon icon-tabler icon-tabler-chevron-right inline-block"
+       width="20" height="20" viewBox="0 0 24 24"
+       stroke="currentColor" fill="none"
+       stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+       >
+    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+    <polyline points="9 6 15 12 9 18" />
+  </svg>
+`.trim();
+
+const editIcon = `
+  <svg xmlns="http://www.w3.org/2000/svg"
+       class="icon icon-tabler icon-tabler-pencil inline-block"
+       width="20" height="20" viewBox="0 0 24 24"
+       stroke="currentColor" fill="none"
+       stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+       >
+    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+    <path d="M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4" />
+    <line x1="13.5" y1="6.5" x2="17.5" y2="10.5" />
+  </svg>
+`.trim();
+
 function provideCalendarUI(calendar: string, slot: string) {
   if (!slot) {
     throw new Error("Attemp to render without slot");
@@ -125,7 +164,93 @@ function provideCalendarUI(calendar: string, slot: string) {
   logseq.provideUI(params);
 }
 
+async function constructYearlyCalendar(
+  uuid: string,
+  slot: string,
+  year4: string,
+  lang: Lang,
+  options: string[],
+): string {
+  const now = new Date();
+  const language = lang.label;
+  const optionsJoined = options.join(" ");
+
+  let monthView = "";
+  for (let month0 of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]) {
+    const calendar = await setCal(year4, month0, slot, lang, [
+      "nonav",
+      "noyear",
+    ]);
+    monthView += calendar;
+  }
+
+  let header = null;
+  if (options.includes("nohead")) {
+    header = "";
+  } else {
+    header = `
+      <div class="header">
+        <span class="calendar-header-title">${year4}</span>
+        <div class="controls">
+          <a class="button inline-button no-padding-button"
+             data-uuid="${uuid}"
+             data-on-click="editBlock"
+            >${editIcon}</a>
+    `.trim();
+
+    if (!options.includes("nonav")) {
+      header += `
+        <a class="button inline-button no-padding-button" 
+           title="Jump to previous year."
+           data-on-click="loadCalendarYearly"
+           data-year="${year4 - 1}"
+           data-language="${language}"
+           data-slot="${slot}"
+           data-uuid="${uuid}"
+           data-options="${optionsJoined}"
+          >${leftArrowIcon}</a>
+
+        <a class="button inline-button padding-button"
+           title="Jump back to current year."
+           data-on-click="loadCalendarYearly"
+           data-year="${now.getFullYear()}"
+           data-language="${language}"
+           data-slot="${slot}"
+           data-uuid="${uuid}"
+           data-options="${optionsJoined}"
+          >${lang.Today}</a>
+
+        <a class="button inline-button no-padding-button"
+           title="Jump to next year"
+           data-on-click="loadCalendarYearly"
+           data-year="${year4 + 1}"
+           data-language="${language}"
+           data-slot="${slot}"
+           data-uuid="${uuid}"
+           data-options="${optionsJoined}"
+          >${rightArrowIcon}</a>
+
+     `.trim();
+    }
+
+    header += "</div></div>";
+  }
+
+  return header + `<div class="yearly-months">${monthView}</div>`;
+}
+
+function provideYearlyCalendarUI(calendar: string, slot: string) {
+  logseq.provideUI({
+    key: "block-calendar-yearly-" + slot,
+    slot: slot,
+    reset: true,
+    template: calendar,
+  });
+}
+
 const main = async () => {
+  const getLang = getLangFunc(logseq.settings?.defaultLanguage);
+
   logseq.Editor.registerSlashCommand("Insert Block Calendar", async () => {
     await logseq.Editor.insertAtEditingCursor("{{renderer block-calendar}}");
   });
@@ -153,63 +278,19 @@ const main = async () => {
       const { year, month, slot, language, options } = e.dataset;
 
       const [year4, month0] = parseYearMonth(year, month);
-      const calendar = await setCal(year4, month0, slot, language, options.split(" "));
+      const calendar = await setCal(year4, month0, slot, language, parseOptions(options));
       provideCalendarUI(calendar, slot);
     },
 
     async loadCalendarYearly(e: any) {
       let { year, slot, language, uuid, options } = e.dataset;
 
-      options = options ? options.split(" ") : [];
       const [year4, _] = parseYearMonth(year, null, new Date());
+      const lang = getLang(language);
+      options = parseOptions(options);
 
-      if (year4) {
-        let monthView = "";
-        for (let month0 of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]) {
-          const calendar = await setCal(year4, month0, slot, language, [
-            "nonav",
-            "noyear",
-          ]);
-          monthView += calendar;
-        }
-        let header = `<div class="header"><span class="calendar-header-title">${year4}</span><div class="controls">
-        <a class="button inline-button no-padding-button" data-uuid="${uuid}" data-on-click="editBlock"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-pencil inline-block" width="20" height="20" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-          <path d="M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4" />
-          <line x1="13.5" y1="6.5" x2="17.5" y2="10.5" />
-        </svg></a>`;
-
-        if (!options.includes("nonav")) {
-          header += `
-        <a class="button inline-button no-padding-button" data-year="${
-          year4 - 1
-        }" data-slot="${slot}" data-uuid="${uuid}" data-language="${language}" data-on-click="loadCalendarYearly" title="Jump to previous year."><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-left inline-block" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-        <polyline points="15 6 9 12 15 18" />
-      </svg></a> <a class="button inline-button padding-button" data-year="${year4}" data-slot="${slot}" data-uuid="${uuid}" data-language="${language}" data-on-click="loadCalendarYearly" title="Jump back to current year.">${
-            "Today"
-          }</a> <a class="button inline-button no-padding-button" data-year="${
-            year4 + 1
-          }" data-slot="${slot}" data-uuid="${uuid}" data-language="${language}" data-on-click="loadCalendarYearly" title="Jump to next year"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-right inline-block" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-        <polyline points="9 6 15 12 9 18" />
-      </svg></a>
-        `;
-        }
-
-        header += "</div></div>";
-
-        const template = `${
-          !options.includes("nohead") ? header : ""
-        }<div class="yearly-months">${monthView}</div>`;
-
-        logseq.provideUI({
-          key: "block-calendar-yearly-" + slot,
-          slot: slot,
-          reset: true,
-          template: template,
-        });
-      }
+      const calendar = await constructYearlyCalendar(uuid, slot, year4, lang, options);
+      provideYearlyCalendarUI(calendar, slot);  
     },
   });
 
@@ -221,6 +302,8 @@ const main = async () => {
       let [_, year, month, language, ...options] = payload.arguments;
 
       const [year4, month0] = parseYearMonth(year, month, new Date());
+      options = parseOptions(options);
+
       const calendar = await setCal(year4, month0, slot, language, options);
       provideCalendarUI(calendar, slot);
     }
@@ -228,64 +311,11 @@ const main = async () => {
       let [_, year, language, ...options] = payload.arguments;
 
       const [year4, __] = parseYearMonth(year, null, new Date());
+      const lang = getLang(language);
+      options = parseOptions(options);
 
-      let monthView = "";
-      for (let month0 of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]) {
-        const calendar = await setCal(year4, month0, slot, language, [
-          "nonav",
-          "noyear",
-        ]);
-        monthView += calendar;
-      }
-      let header = `<div class="header"><span class="calendar-header-title">${year4}</span><div class="controls">
-      <a class="button inline-button no-padding-button" data-uuid="${uuid}" data-on-click="editBlock"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-pencil inline-block" width="20" height="20" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-          <path d="M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4" />
-          <line x1="13.5" y1="6.5" x2="17.5" y2="10.5" />
-        </svg></a>`;
-
-      if (!options.includes("nonav")) {
-        header += `
-        <a class="button inline-button no-padding-button" data-year="${
-          year4 - 1
-        }" data-language="${language}" data-slot="${slot}" data-uuid="${uuid}" data-on-click="loadCalendarYearly" data-options="${options.join(
-          " "
-        )}" data-options="${options.join(
-          " "
-        )}" title="Jump to previous year."><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-left inline-block" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-        <polyline points="15 6 9 12 15 18" />
-      </svg></a> <a class="button inline-button padding-button" data-year="${year4}" data-language="${language}" data-slot="${slot}" data-uuid="${uuid}" data-on-click="loadCalendarYearly" data-options="${options.join(
-          " "
-        )}" data-options="${options.join(
-          " "
-        )}" title="Jump back to current year.">${
-          "Today"
-        }</a> <a class="button inline-button no-padding-button" data-year="${
-          year4 + 1
-        }" data-language="${language}" data-slot="${slot}" data-uuid="${uuid}" data-on-click="loadCalendarYearly" data-options="${options.join(
-          " "
-        )}" data-options="${options.join(
-          " "
-        )}" title="Jump to next year"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-right inline-block" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-        <polyline points="9 6 15 12 9 18" />
-      </svg></a>
-       `;
-      }
-
-      header += "</div></div>";
-
-      const template = `${
-        !options.includes("nohead") ? header : ""
-      }<div class="yearly-months">${monthView}</div>`;
-
-      logseq.provideUI({
-        key: "block-calendar-yearly-" + slot,
-        slot: slot,
-        reset: true,
-        template: template,
-      });
+      const calendar = await constructYearlyCalendar(uuid, slot, year4, lang, options);
+      provideYearlyCalendarUI(calendar, slot);
     }
   });
 
@@ -347,7 +377,7 @@ const main = async () => {
       month = state.dataset.month;
     }
 
-    let [year4, month0] = parseYearMonth(year, month, new Date);
+    let [year4, month0] = parseYearMonth(year, month, new Date());
 
     if (state) {
       // it is previous button → so we need to add one month

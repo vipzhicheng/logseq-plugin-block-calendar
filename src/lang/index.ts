@@ -33,6 +33,8 @@ const langs = {
   "pt-PT": ptPT,
 };
 
+export const Lang = typeof langs["en"];
+
 export const englishLanguage = "English";
 const languageMapping: {[key: string]: string} = {
   [englishLanguage]: "en",
@@ -55,7 +57,7 @@ export const availableLanguages = Object.keys(languageMapping);
 
 
 export default function getLangFunc(defaultLanguage: string) {
-  return (language: string) => {
+  return (language: any): Lang => {
     if (Object.values(langs).includes(language)) {
       return language;
     }
@@ -73,7 +75,9 @@ export default function getLangFunc(defaultLanguage: string) {
 
     lang = lang || englishLanguage;
 
-    return langs[lang];
+    const langObj = langs[lang as keyof typeof langs];
+    langObj.label = lang;
+    return langObj;
   }
 }
 
