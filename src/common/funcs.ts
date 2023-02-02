@@ -7,7 +7,6 @@ dayjs.extend(isToday);
 
 import getLangFunc from "../lang";
 
-
 export function print(msg: string) {
   console.info(`#${logseq.baseInfo.id}: ${msg}`);
 }
@@ -65,18 +64,21 @@ function isInteger(x: number | string) {
   return Number.isInteger(Number(x)) && x !== null;
 }
 
-export function parseYearMonth(year, month, now: Date = null) {
-  const year4  = isInteger(year)  ? Number(year)      : now?.getFullYear() || null;
+export function parseYearMonth(year: any, month: any, now: Date = new Date()) {
+  const year4 = isInteger(year) ? Number(year) : now?.getFullYear() || null;
   const month0 = isInteger(month) ? Number(month) - 1 : now?.getMonth() || null;
   return [year4, month0];
 }
 
-export function parseOptions(arr: string | string[], delimeters: string = " |:"): string[] {
+export function parseOptions(
+  arr: string | string[],
+  delimeters: string = " |:"
+): string[] {
   if (Array.isArray(arr)) {
     if (arr.length !== 1) {
       return arr;
     }
-    
+
     [arr] = arr;
   }
 
@@ -435,7 +437,10 @@ async function _getCurrentRepoRangeJournals(year: number, month: number) {
   return (ret || []).flat();
 }
 
-async function _getCurrentRepoRangeUndoneTaskJournals(year: number, month: number) {
+async function _getCurrentRepoRangeUndoneTaskJournals(
+  year: number,
+  month: number
+) {
   const my = year + (month < 10 ? "0" : "") + month;
   let ret;
   try {
@@ -456,7 +461,10 @@ async function _getCurrentRepoRangeUndoneTaskJournals(year: number, month: numbe
   return (ret || []).flat();
 }
 
-async function _getCurrentRepoRangeDoneTaskJournals(year: number, month: number) {
+async function _getCurrentRepoRangeDoneTaskJournals(
+  year: number,
+  month: number
+) {
   const my = year + (month < 10 ? "0" : "") + month;
   let ret;
   try {

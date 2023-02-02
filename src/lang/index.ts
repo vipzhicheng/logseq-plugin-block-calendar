@@ -14,7 +14,6 @@ import tr from "./tr";
 import it from "./it";
 import ko from "./ko";
 
-
 const langs = {
   ko,
   it,
@@ -33,10 +32,10 @@ const langs = {
   "pt-PT": ptPT,
 };
 
-export const Lang = typeof langs["en"];
+export type Lang = typeof langs["en"] & { label: string };
 
 export const englishLanguage = "English";
-const languageMapping: {[key: string]: string} = {
+const languageMapping: { [key: string]: string } = {
   [englishLanguage]: "en",
   Français: "fr",
   Deutsch: "de",
@@ -55,15 +54,10 @@ const languageMapping: {[key: string]: string} = {
 };
 export const availableLanguages = Object.keys(languageMapping);
 
-
 export default function getLangFunc(defaultLanguage: string) {
-  return (language: any): Lang => {
-    if (Object.values(langs).includes(language)) {
-      return language;
-    }
-
-    let lang = language;
+  return (language: string): Lang => {
     const availableLangs = Object.keys(langs);
+    let lang = language;
 
     if (availableLangs.includes(languageMapping[lang])) {
       lang = languageMapping[lang];
@@ -73,21 +67,20 @@ export default function getLangFunc(defaultLanguage: string) {
       lang = languageMapping[defaultLanguage];
     }
 
-    lang = lang || englishLanguage;
+    lang = lang || languageMapping[englishLanguage];
 
-    const langObj = langs[lang as keyof typeof langs];
+    const langObj = langs[lang as keyof typeof langs] as Lang;
     langObj.label = lang;
     return langObj;
-  }
+  };
 }
 
-
 function test_getLang() {
-  const defaultLanguage = 'Français';
+  const defaultLanguage = "Français";
   const func = getLangFunc(defaultLanguage);
 
   let count = 1;
-  const assert = (arg, expected, notEquals=false) => {
+  const assert = (arg: any, expected: any, notEquals = false) => {
     let aTest = func(arg) === expected;
     if (notEquals) {
       aTest = !aTest;
@@ -106,9 +99,9 @@ function test_getLang() {
     count++;
   };
 
-
   const langEn = langs["en"];
-  const langDefault = langs[languageMapping[defaultLanguage]];
+  const langDefault =
+    langs[languageMapping[defaultLanguage] as keyof typeof langs];
 
   assert(null, langDefault);
   assert(null, langs["af"], true);

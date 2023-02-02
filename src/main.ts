@@ -73,7 +73,8 @@ const defineSettings: SettingSchemaDesc[] = [
   {
     key: "alwaysRenderIn",
     type: "string",
-    title: "Widget location (use .sidebar-item-list to locate the right sidebar)",
+    title:
+      "Widget location (use .sidebar-item-list to locate the right sidebar)",
     description:
       "Always render calendar in custom page location (provide CSS selector: ID or class). Leave empty to disable.",
     default: ".sidebar-item-list",
@@ -167,17 +168,17 @@ function provideCalendarUI(calendar: string, slot: string) {
 async function constructYearlyCalendar(
   uuid: string,
   slot: string,
-  year4: string,
+  year4: number,
   lang: Lang,
-  options: string[],
-): string {
+  options: string[]
+): Promise<string> {
   const now = new Date();
   const language = lang.label;
   const optionsJoined = options.join(" ");
 
   let monthView = "";
   for (let month0 of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]) {
-    const calendar = await setCal(year4, month0, slot, lang, [
+    const calendar = await setCal(year4, month0, slot, lang.label, [
       "nonav",
       "noyear",
     ]);
@@ -200,7 +201,7 @@ async function constructYearlyCalendar(
 
     if (!options.includes("nonav")) {
       header += `
-        <a class="button inline-button no-padding-button" 
+        <a class="button inline-button no-padding-button"
            title="Jump to previous year."
            data-on-click="loadCalendarYearly"
            data-year="${year4 - 1}"
@@ -255,9 +256,14 @@ const main = async () => {
     await logseq.Editor.insertAtEditingCursor("{{renderer block-calendar}}");
   });
 
-  logseq.Editor.registerSlashCommand("Insert Block Yearly Calendar", async () => {
-    await logseq.Editor.insertAtEditingCursor("{{renderer block-calendar-yearly}}");
-  });
+  logseq.Editor.registerSlashCommand(
+    "Insert Block Yearly Calendar",
+    async () => {
+      await logseq.Editor.insertAtEditingCursor(
+        "{{renderer block-calendar-yearly}}"
+      );
+    }
+  );
 
   logseq.provideModel({
     async editBlock(e: any) {
@@ -278,7 +284,17 @@ const main = async () => {
       const { year, month, slot, language, options } = e.dataset;
 
       const [year4, month0] = parseYearMonth(year, month);
-      const calendar = await setCal(year4, month0, slot, language, parseOptions(options));
+
+      if (year4 === null || month0 === null) {
+        return;
+      }
+      const calendar = await setCal(
+        year4,
+        month0,
+        slot,
+        language,
+        parseOptions(options)
+      );
       provideCalendarUI(calendar, slot);
     },
 
@@ -289,8 +305,18 @@ const main = async () => {
       const lang = getLang(language);
       options = parseOptions(options);
 
-      const calendar = await constructYearlyCalendar(uuid, slot, year4, lang, options);
-      provideYearlyCalendarUI(calendar, slot);  
+      if (year4 === null) {
+        return;
+      }
+
+      const calendar = await constructYearlyCalendar(
+        uuid,
+        slot,
+        year4,
+        lang,
+        options
+      );
+      provideYearlyCalendarUI(calendar, slot);
     },
   });
 
@@ -304,17 +330,29 @@ const main = async () => {
       const [year4, month0] = parseYearMonth(year, month, new Date());
       options = parseOptions(options);
 
+      if (year4 === null || month0 === null) {
+        return;
+      }
       const calendar = await setCal(year4, month0, slot, language, options);
       provideCalendarUI(calendar, slot);
-    }
-    else if (type === "block-calendar-yearly") {
+    } else if (type === "block-calendar-yearly") {
       let [_, year, language, ...options] = payload.arguments;
 
       const [year4, __] = parseYearMonth(year, null, new Date());
       const lang = getLang(language);
       options = parseOptions(options);
 
-      const calendar = await constructYearlyCalendar(uuid, slot, year4, lang, options);
+      if (year4 === null) {
+        return;
+      }
+
+      const calendar = await constructYearlyCalendar(
+        uuid,
+        slot,
+        year4,
+        lang,
+        options
+      );
       provideYearlyCalendarUI(calendar, slot);
     }
   });
@@ -367,17 +405,23 @@ const main = async () => {
     widgetPlaceholder.style.display = "block";
 
     // get widget "<" button
-    const state = widgetPlaceholder.querySelector(".calendar-nav > a");
+    const state = widgetPlaceholder.querySelector(
+      ".calendar-nav > a"
+    ) as HTMLElement;
 
     let year = null;
     let month = null;
     if (state) {
       // extract year & month from button
-      year  = state.dataset.year;
+      year = state.dataset.year;
       month = state.dataset.month;
     }
 
     let [year4, month0] = parseYearMonth(year, month, new Date());
+
+    if (year4 === null || month0 === null) {
+      return;
+    }
 
     if (state) {
       // it is previous button → so we need to add one month
@@ -422,6 +466,10 @@ const main = async () => {
 
   logseq.onSettingsChanged(async (newSettings: any, oldSettings: any) => {
     if (newSettings.alwaysRenderIn !== oldSettings.alwaysRenderIn) {
+      await renderAlwaysIn(newSettings.alwaysRenderIn, true);
+    }
+
+    if (newSettings.defaultLanguage !== oldSettings.defaultLanguage) {
       await renderAlwaysIn(newSettings.alwaysRenderIn, true);
     }
   });
