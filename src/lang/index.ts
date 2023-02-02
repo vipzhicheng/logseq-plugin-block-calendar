@@ -14,7 +14,8 @@ import tr from "./tr";
 import it from "./it";
 import ko from "./ko";
 
-export default {
+
+const langs = {
   ko,
   it,
   tr,
@@ -31,3 +32,98 @@ export default {
   "pt-BR": ptBR,
   "pt-PT": ptPT,
 };
+
+export const Lang = typeof langs["en"];
+
+export const englishLanguage = "English";
+const languageMapping: {[key: string]: string} = {
+  [englishLanguage]: "en",
+  Français: "fr",
+  Deutsch: "de",
+  简体中文: "zh-CN",
+  繁體中文: "zh-Hant",
+  Afrikaans: "af",
+  Español: "es",
+  "Norsk (bokmål)": "nb-NO",
+  "Português (Brasileiro)": "pt-BR",
+  "Português (Europeu)": "pt-PT",
+  Русский: "ru",
+  日本語: "ja",
+  Italiano: "it",
+  Türkçe: "tr",
+  한국어: "ko",
+};
+export const availableLanguages = Object.keys(languageMapping);
+
+
+export default function getLangFunc(defaultLanguage: string) {
+  return (language: any): Lang => {
+    if (Object.values(langs).includes(language)) {
+      return language;
+    }
+
+    let lang = language;
+    const availableLangs = Object.keys(langs);
+
+    if (availableLangs.includes(languageMapping[lang])) {
+      lang = languageMapping[lang];
+    }
+
+    if (!availableLangs.includes(lang)) {
+      lang = languageMapping[defaultLanguage];
+    }
+
+    lang = lang || englishLanguage;
+
+    const langObj = langs[lang as keyof typeof langs];
+    langObj.label = lang;
+    return langObj;
+  }
+}
+
+
+function test_getLang() {
+  const defaultLanguage = 'Français';
+  const func = getLangFunc(defaultLanguage);
+
+  let count = 1;
+  const assert = (arg, expected, notEquals=false) => {
+    let aTest = func(arg) === expected;
+    if (notEquals) {
+      aTest = !aTest;
+    }
+
+    if (!aTest) {
+      arg = JSON.stringify(arg);
+      expected = JSON.stringify(expected);
+      const operation = notEquals ? "===" : "!==";
+
+      throw new Error(
+        `Assertion #${count} fails: ${arg} ${operation} ${expected}`
+      );
+    }
+
+    count++;
+  };
+
+
+  const langEn = langs["en"];
+  const langDefault = langs[languageMapping[defaultLanguage]];
+
+  assert(null, langDefault);
+  assert(null, langs["af"], true);
+  assert(false, langDefault);
+  assert("", langDefault);
+
+  assert("not a lang", langDefault);
+
+  assert("en", langEn);
+  assert("English", langEn);
+
+  assert("fr", langs["fr"]);
+  assert("Français", langs["fr"]);
+
+  assert(langEn, langEn);
+
+  assert(englishLanguage, langEn);
+}

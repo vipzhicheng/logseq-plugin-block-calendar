@@ -1,30 +1,12 @@
 import "@logseq/libs";
+
 import { format, toDate, utcToZonedTime } from "date-fns-tz";
 import dayjs from "dayjs";
 import isToday from "dayjs/plugin/isToday";
-import langs from "../lang";
-
 dayjs.extend(isToday);
 
-export const languageMapping: {
-  [key: string]: string;
-} = {
-  English: "en",
-  Français: "fr",
-  Deutsch: "de",
-  简体中文: "zh-CN",
-  繁體中文: "zh-Hant",
-  Afrikaans: "af",
-  Español: "es",
-  "Norsk (bokmål)": "nb-NO",
-  "Português (Brasileiro)": "pt-BR",
-  "Português (Europeu)": "pt-PT",
-  Русский: "ru",
-  日本語: "ja",
-  Italiano: "it",
-  Türkçe: "tr",
-  한국어: "ko",
-};
+import getLangFunc from "../lang";
+
 
 export function print(msg: string) {
   console.info(`#${logseq.baseInfo.id}: ${msg}`);
@@ -78,6 +60,34 @@ function getMonthName(month: number, lang: any) {
   return ar[month];
 }
 
+function isInteger(x: number | string) {
+  // source: https://stackoverflow.com/a/59459179
+  return Number.isInteger(Number(x)) && x !== null;
+}
+
+export function parseYearMonth(year, month, now: Date = null) {
+  const year4  = isInteger(year)  ? Number(year)      : now?.getFullYear() || null;
+  const month0 = isInteger(month) ? Number(month) - 1 : now?.getMonth() || null;
+  return [year4, month0];
+}
+
+export function parseOptions(arr: string | string[], delimeters: string = " |:"): string[] {
+  if (Array.isArray(arr)) {
+    if (arr.length !== 1) {
+      return arr;
+    }
+    
+    [arr] = arr;
+  }
+
+  let options: string = arr || "";
+  if (!options) {
+    return [];
+  }
+
+  return options.split(new RegExp(`[${delimeters}]+`));
+}
+
 export async function setCal(
   year4: number,
   month0: number,
@@ -86,7 +96,9 @@ export async function setCal(
   options: string[] = []
 ) {
   clearCachedDays();
+  const getLang = getLangFunc(logseq.settings?.defaultLanguage);
   const lang = getLang(language);
+
   const now = new Date();
   const monthName = getMonthName(month0, lang);
   const date = now.getDate();
@@ -110,20 +122,6 @@ export async function setCal(
     language,
     options
   );
-}
-
-export function getLang(language: string) {
-  let lang = language;
-
-  if (Object.keys(langs).includes(languageMapping[lang])) {
-    lang = languageMapping[lang];
-  }
-
-  if (!Object.keys(langs).includes(lang)) {
-    lang = languageMapping[logseq.settings?.defaultLanguage];
-  }
-
-  return langs[lang as keyof typeof langs];
 }
 
 let journalDays: number[] = [];
@@ -437,10 +435,7 @@ async function _getCurrentRepoRangeJournals(year: number, month: number) {
   return (ret || []).flat();
 }
 
-async function _getCurrentRepoRangeUndoneTaskJournals(
-  year: number,
-  month: number
-) {
+async function _getCurrentRepoRangeUndoneTaskJournals(year: number, month: number) {
   const my = year + (month < 10 ? "0" : "") + month;
   let ret;
   try {
@@ -450,11 +445,10 @@ async function _getCurrentRepoRangeUndoneTaskJournals(
         [?b :block/marker ?marker]
         [(contains? #{"NOW" "LATER" "TODO" "DOING", "WAITING"} ?marker)]
         [?b :block/page ?p]
-          [?p :block/journal? true]
-          [?p :block/journal-day ?d]
-          [(>= ?d ${my}01)] [(<= ?d ${my}31)]]
-          ]
-
+        [?p :block/journal? true]
+        [?p :block/journal-day ?d]
+        [(>= ?d ${my}01)] [(<= ?d ${my}31)]]
+      ]
     `);
   } catch (e) {
     console.error(e);
@@ -462,10 +456,7 @@ async function _getCurrentRepoRangeUndoneTaskJournals(
   return (ret || []).flat();
 }
 
-async function _getCurrentRepoRangeDoneTaskJournals(
-  year: number,
-  month: number
-) {
+async function _getCurrentRepoRangeDoneTaskJournals(year: number, month: number) {
   const my = year + (month < 10 ? "0" : "") + month;
   let ret;
   try {
@@ -475,11 +466,10 @@ async function _getCurrentRepoRangeDoneTaskJournals(
         [?b :block/marker ?marker]
         [(contains? #{"DONE"} ?marker)]
         [?b :block/page ?p]
-          [?p :block/journal? true]
-          [?p :block/journal-day ?d]
-          [(>= ?d ${my}01)] [(<= ?d ${my}31)]]
-          ]
-
+        [?p :block/journal? true]
+        [?p :block/journal-day ?d]
+        [(>= ?d ${my}01)] [(<= ?d ${my}31)]]
+      ]
     `);
   } catch (e) {
     console.error(e);
