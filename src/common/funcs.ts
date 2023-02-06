@@ -90,6 +90,30 @@ export function parseOptions(
   return options.split(new RegExp(`[${delimeters}]+`));
 }
 
+export const copyToClipboard = (str: string) => {
+  const el = top?.document.createElement("textarea");
+  if (el) {
+    el.value = str;
+    el.setAttribute("readonly", "");
+    el.style.position = "absolute";
+    el.style.left = "-9999px";
+    top?.document.body.appendChild(el);
+
+    const selection = top?.document.getSelection();
+    if (selection) {
+      const selected =
+        selection.rangeCount > 0 ? selection.getRangeAt(0) : false;
+      el.select();
+      top?.document.execCommand("copy");
+      top?.document.body.removeChild(el);
+      if (selected) {
+        selection.removeAllRanges();
+        selection.addRange(selected);
+      }
+    }
+  }
+};
+
 export async function setCal(
   year4: number,
   month0: number,

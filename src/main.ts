@@ -8,6 +8,7 @@ import {
   setCal,
   parseYearMonth,
   parseOptions,
+  copyToClipboard,
 } from "./common/funcs";
 import getLangFunc from "./lang";
 import { englishLanguage, availableLanguages, Lang } from "./lang";
@@ -274,9 +275,22 @@ const main = async () => {
     async processJump(e: any) {
       const { type, value } = e.dataset;
       if (type === "day") {
-        logseq.App.pushState("page", {
-          name: value,
-        });
+        if (top?.document.body?.dataset?.activeKeystroke === "Shift") {
+          const page = await logseq.Editor.getPage(value);
+          if (page) {
+            logseq.Editor.openInRightSidebar(page.uuid);
+          }
+        } else if (
+          top?.document.body?.dataset?.activeKeystroke === "Meta" ||
+          top?.document.body?.dataset?.activeKeystroke === "Control"
+        ) {
+          copyToClipboard(value);
+          // logseq.UI.showMsg(`Date ${value} has been copied to clipboard!`);
+        } else {
+          logseq.App.pushState("page", {
+            name: value,
+          });
+        }
       }
     },
 
