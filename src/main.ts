@@ -275,14 +275,19 @@ const main = async () => {
     async processJump(e: any) {
       const { type, value } = e.dataset;
       if (type === "day") {
-        if (top?.document.body?.dataset?.activeKeystroke === "Shift") {
+        if (
+          top?.document.body?.dataset?.activeKeystroke === "Shift" ||
+          (top?.document.body?.dataset?.activeKeystroke &&
+            top?.document.body?.dataset?.activeKeystroke?.indexOf("Shift") > -1)
+        ) {
           const page = await logseq.Editor.getPage(value);
           if (page) {
             logseq.Editor.openInRightSidebar(page.uuid);
           }
         } else if (
           top?.document.body?.dataset?.activeKeystroke === "Meta" ||
-          top?.document.body?.dataset?.activeKeystroke === "Control"
+          (top?.document.body?.dataset?.activeKeystroke &&
+            top?.document.body?.dataset?.activeKeystroke?.indexOf("Meta") > -1)
         ) {
           copyToClipboard(value);
           // logseq.UI.showMsg(`Date ${value} has been copied to clipboard!`);
