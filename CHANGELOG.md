@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v0.2.2
+
+- feat: add shortcut `shift` to open journal on sidebar
+- feat: add shortcut `meta` to copy date string
+
 ## v0.2.1
 
 - fix: add state to widget so there is no fallback to current month on render
