@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.2.4
+
+- fix: try to resolve the timezone issue.
+
 ## v0.2.3
 
 - fix: try to resolve the timezone issue.

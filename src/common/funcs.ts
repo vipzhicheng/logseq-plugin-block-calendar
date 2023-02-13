@@ -1,6 +1,7 @@
 import "@logseq/libs";
 
 import { format, toDate, utcToZonedTime, formatInTimeZone } from "date-fns-tz";
+import { getDateForPageWithoutBrackets } from "logseq-dateutils";
 import dayjs from "dayjs";
 import isToday from "dayjs/plugin/isToday";
 dayjs.extend(isToday);
@@ -380,10 +381,14 @@ export async function drawCal(
         text += `<td></td>`;
         curCell++;
       } else {
-        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        const journalTitle = formatInTimeZone(
-          new Date(`${year}-${month + 1}-${digit}`),
-          timezone,
+        // const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        // const journalTitle = formatInTimeZone(
+        //   new Date(`${year}-${month + 1}-${digit}`),
+        //   timezone,
+        //   config.preferredDateFormat
+        // );
+        const journalTitle = getDateForPageWithoutBrackets(
+          new Date(year, month, digit),
           config.preferredDateFormat
         );
 
