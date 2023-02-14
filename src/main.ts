@@ -358,13 +358,17 @@ const main = async () => {
       let [_, year, language, ...options] = payload.arguments;
 
       const [year4, __] = parseYearMonth(year, null, new Date());
+
+      if (language.indexOf("nonav") > -1 || language.indexOf("nohead") > -1) {
+        options.push(language);
+        language = ""; // decide by settings.
+      }
       const lang = getLang(language);
       options = parseOptions(options);
 
       if (year4 === null) {
         return;
       }
-
       const calendar = await constructYearlyCalendar(
         uuid,
         slot,

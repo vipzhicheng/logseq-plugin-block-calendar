@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v0.2.5
+
+- fix: yearly block calendar option to set option without language
+- fix: adjust today background
+
 ## v0.2.4
 
 - fix: try to resolve the timezone issue.

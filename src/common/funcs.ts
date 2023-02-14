@@ -612,6 +612,7 @@ export function provideStyle(opts: any = {}) {
 
     .logseq-block-calendar .calendar-day-today {
       font-weight: bold;
+      background-color: #eee;
       color: var(--ls-link-text-color);
     }
 
