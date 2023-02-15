@@ -513,6 +513,31 @@ async function _getCurrentRepoRangeDoneTaskJournals(
 }
 
 export function provideStyle(opts: any = {}) {
+  if (logseq.settings?.alwaysRenderIn === "Left sidebar") {
+    logseq.provideStyle({
+      key: "block-calendar-left-sidebar",
+      style: `
+        :root {
+          --ls-left-sidebar-width: 350px;
+        }
+        #nav-sidebar-placeholder {
+          padding: 1rem;
+          border-top: 1px solid #eee;
+          border-bottom: 1px solid #eee;
+        }
+      `,
+    });
+  } else {
+    logseq.provideStyle({
+      key: "block-calendar-left-sidebar",
+      style: `
+        #nav-sidebar-placeholder {
+          display: none;
+        }
+      `,
+    });
+  }
+
   const {} = opts;
   logseq.provideStyle({
     key: "block-calendar",
