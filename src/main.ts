@@ -72,7 +72,7 @@ const defineSettings: SettingSchemaDesc[] = [
     default: "100%",
   },
   {
-    key: "alwaysRenderIn",
+    key: "alwaysRenderLocation",
     type: "enum",
     enumChoices: ["Left sidebar", "Right sidebar", "Custom", "Disabled"],
     title: "Widget location",
@@ -80,11 +80,11 @@ const defineSettings: SettingSchemaDesc[] = [
     default: "Disabled",
   },
   {
-    key: "alwaysRenderInSelector",
+    key: "alwaysRenderIn",
     type: "string",
     title: "use .sidebar-item-list to locate the right sidebar",
     description:
-      "Provide CSS selector: ID or class. Only works when alwaysRenderIn = Custom",
+      "Provide CSS selector: ID or class. Only works when alwaysRenderLocation = Custom",
     default: ".sidebar-item-list",
   },
   {
@@ -405,13 +405,16 @@ const main = async () => {
       widgetPlaceholder = null;
     };
 
-    if (logseq.settings?.alwaysRenderIn === "Left sidebar") {
+    if (logseq.settings?.alwaysRenderLocation === "Left sidebar") {
       containerSelector = "#nav-sidebar-placeholder";
-    } else if (logseq.settings?.alwaysRenderIn === "Right sidebar") {
+    } else if (logseq.settings?.alwaysRenderLocation === "Right sidebar") {
       containerSelector = ".sidebar-item-list";
     }
 
-    if (!containerSelector || logseq.settings?.alwaysRenderIn === "Disabled") {
+    if (
+      !containerSelector ||
+      logseq.settings?.alwaysRenderLocation === "Disabled"
+    ) {
       remove(widgetPlaceholder);
       print("Remove calendar widget");
       return;
@@ -487,44 +490,44 @@ const main = async () => {
   navContentEl.before(navContentPlaceholder);
 
   setTimeout(async () => {
-    await renderAlwaysIn(logseq.settings?.alwaysRenderInSelector);
+    await renderAlwaysIn(logseq.settings?.alwaysRenderIn);
   }, 1000);
 
   logseq.App.onGraphAfterIndexed(() => {
     setTimeout(async () => {
-      await renderAlwaysIn(logseq.settings?.alwaysRenderInSelector);
+      await renderAlwaysIn(logseq.settings?.alwaysRenderIn);
     }, 1000);
   });
 
   logseq.App.onCurrentGraphChanged(() => {
     setTimeout(async () => {
-      await renderAlwaysIn(logseq.settings?.alwaysRenderInSelector);
+      await renderAlwaysIn(logseq.settings?.alwaysRenderIn);
     }, 1000);
   });
 
   logseq.App.onSidebarVisibleChanged(async (e) => {
     if (e.visible) {
-      await renderAlwaysIn(logseq.settings?.alwaysRenderInSelector);
+      await renderAlwaysIn(logseq.settings?.alwaysRenderIn);
     }
   });
 
   logseq.onSettingsChanged(async (newSettings: any, oldSettings: any) => {
     if (
-      newSettings.alwaysRenderIn !== oldSettings.alwaysRenderIn ||
-      newSettings.alwaysRenderInSelector !== oldSettings.alwaysRenderInSelector
+      newSettings.alwaysRenderLocation !== oldSettings.alwaysRenderLocation ||
+      newSettings.alwaysRenderIn !== oldSettings.alwaysRenderIn
     ) {
-      await renderAlwaysIn(newSettings.alwaysRenderInSelector, true);
+      await renderAlwaysIn(newSettings.alwaysRenderIn, true);
     }
 
     if (newSettings.defaultLanguage !== oldSettings.defaultLanguage) {
-      await renderAlwaysIn(newSettings.alwaysRenderInSelector, true);
+      await renderAlwaysIn(newSettings.alwaysRenderIn, true);
     }
   });
 
   logseq.DB.onChanged(async ({ blocks, txData, txMeta }) => {
     for (const block of blocks) {
       if (block.journalDay) {
-        await renderAlwaysIn(logseq.settings?.alwaysRenderInSelector);
+        await renderAlwaysIn(logseq.settings?.alwaysRenderIn);
         return;
       }
     }

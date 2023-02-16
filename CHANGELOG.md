@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.2.6
+
+- feat: add left sidebar option.
+
 ## v0.2.5
 
 - fix: yearly block calendar option to set option without language
