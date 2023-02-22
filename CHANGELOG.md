@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.2.7
+
+- fix: console error.
+
 ## v0.2.6
 
 - feat: add left sidebar option.

@@ -102,13 +102,6 @@ logseq.onSettingsChanged(() => {
   provideStyle();
 });
 
-logseq.App.onGraphAfterIndexed(() => {
-  clearCachedDays();
-});
-logseq.App.onCurrentGraphChanged(() => {
-  clearCachedDays();
-});
-
 const calendarKeyPrefix = "block-calendar-";
 
 const calendarWidgetSlot = "widget";
@@ -258,6 +251,13 @@ function provideYearlyCalendarUI(calendar: string, slot: string) {
 }
 
 const main = async () => {
+  logseq.App.onGraphAfterIndexed(() => {
+    clearCachedDays();
+  });
+  logseq.App.onCurrentGraphChanged(() => {
+    clearCachedDays();
+  });
+
   const getLang = getLangFunc(logseq.settings?.defaultLanguage);
 
   logseq.Editor.registerSlashCommand("Insert Block Calendar", async () => {
