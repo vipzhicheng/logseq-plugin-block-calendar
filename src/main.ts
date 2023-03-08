@@ -14,6 +14,12 @@ import getLangFunc from "./lang";
 import { englishLanguage, availableLanguages, Lang } from "./lang";
 
 const defineSettings: SettingSchemaDesc[] = [
+  // @ts-ignore
+  {
+    key: "settings",
+    title: "Settings",
+    type: "heading",
+  },
   {
     key: "enableDot",
     type: "boolean",
@@ -21,6 +27,70 @@ const defineSettings: SettingSchemaDesc[] = [
     description:
       "Enable red dot, to show whether or not journal exists on that day. Need reload to take effect.",
     default: true,
+  },
+  {
+    key: "firstDayOfWeek",
+    type: "enum",
+    title: "First day of week",
+    description:
+      "Which day is the first day of your week? Need to trigger rerender manually to take effect.",
+    enumChoices: ["monday", "sunday"],
+    enumPicker: "radio",
+    default: "sunday",
+  },
+
+  {
+    key: "alwaysRenderLocation",
+    type: "enum",
+    enumChoices: ["Left sidebar", "Right sidebar", "Custom", "Disabled"],
+    title: "Widget location",
+    description: "Always render calendar in predefined or custom location.",
+    default: "Disabled",
+  },
+  {
+    key: "alwaysRenderIn",
+    type: "string",
+    title: "use .sidebar-item-list to locate the right sidebar",
+    description:
+      "Provide CSS selector: ID or class. Only works when alwaysRenderLocation = Custom",
+    default: ".sidebar-item-list",
+  },
+  {
+    key: "yearlyColumns",
+    type: "enum",
+    enumChoices: ["2", "3", "4"],
+    title: "",
+    description: "Choose how many columns in yearly view",
+    default: "3",
+  },
+
+  // @ts-ignore
+  {
+    key: "language",
+    title: "Language",
+    type: "heading",
+  },
+  {
+    key: "defaultLanguage",
+    type: "enum",
+    title: "Language locale",
+    enumChoices: availableLanguages,
+    description: "",
+    default: englishLanguage,
+  },
+
+  // @ts-ignore
+  {
+    key: "theme",
+    title: "Look and feel",
+    type: "heading",
+  },
+  {
+    key: "tableWidth",
+    type: "string",
+    title: "Calendar width",
+    description: "Set calendar width, default is 100%.",
+    default: "100%",
   },
   {
     key: "journalDotColor",
@@ -45,55 +115,6 @@ const defineSettings: SettingSchemaDesc[] = [
     description: "Done task dot color",
     default: "#03b803",
     inputAs: "color",
-  },
-  {
-    key: "firstDayOfWeek",
-    type: "enum",
-    title: "First day of week",
-    description:
-      "Which day is the first day of your week? Need to trigger rerender manually to take effect.",
-    enumChoices: ["monday", "sunday"],
-    enumPicker: "radio",
-    default: "sunday",
-  },
-  {
-    key: "defaultLanguage",
-    type: "enum",
-    title: "Language locale",
-    enumChoices: availableLanguages,
-    description: "",
-    default: englishLanguage,
-  },
-  {
-    key: "tableWidth",
-    type: "string",
-    title: "Calendar width",
-    description: "Set calendar width, default is 100%.",
-    default: "100%",
-  },
-  {
-    key: "alwaysRenderLocation",
-    type: "enum",
-    enumChoices: ["Left sidebar", "Right sidebar", "Custom", "Disabled"],
-    title: "Widget location",
-    description: "Always render calendar in predefined or custom location.",
-    default: "Disabled",
-  },
-  {
-    key: "alwaysRenderIn",
-    type: "string",
-    title: "use .sidebar-item-list to locate the right sidebar",
-    description:
-      "Provide CSS selector: ID or class. Only works when alwaysRenderLocation = Custom",
-    default: ".sidebar-item-list",
-  },
-  {
-    key: "yearlyColumns",
-    type: "enum",
-    enumChoices: ["2", "3", "4"],
-    title: "",
-    description: "Choose how many columns in yearly view",
-    default: "3",
   },
 ];
 

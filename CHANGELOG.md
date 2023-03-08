@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.2.8
+
+- fix: adjust settings ui
+
 ## v0.2.7
 
 - fix: console error.
