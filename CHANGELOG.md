@@ -3,6 +3,7 @@
 ## v0.2.8
 
 - fix: adjust settings ui
+- fix: yearly calender style mess
 
 ## v0.2.7
 

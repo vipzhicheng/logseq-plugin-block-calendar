@@ -542,42 +542,42 @@ export function provideStyle(opts: any = {}) {
   logseq.provideStyle({
     key: "block-calendar",
     style: `
-    [id^="logseq-plugin-block-calendar--block-calendar-yearly-slot"]  {
+    [id^="logseq-block-calendar--block-calendar-yearly-slot"]  {
       display: flex;
       flex-direction: column;
     }
 
-    [id^="logseq-plugin-block-calendar--block-calendar-yearly-slot"] .logseq-block-calendar:not(:nth-child(${
+    [id^="logseq-block-calendar--block-calendar-yearly-slot"] .logseq-block-calendar:not(:nth-child(${
       logseq.settings?.yearlyColumns || 3
     }n)) {
       border-right: 1px solid #eee;
     }
 
-    [id^="logseq-plugin-block-calendar--block-calendar-yearly-slot"] .header .inline-button  {
+    [id^="logseq-block-calendar--block-calendar-yearly-slot"] .header .inline-button  {
       display: inline-block;
       height: 2.6rem;
     }
-    [id^="logseq-plugin-block-calendar--block-calendar-yearly-slot"] .header  {
+    [id^="logseq-block-calendar--block-calendar-yearly-slot"] .header  {
       display: flex;
       justify-content: space-between;
       margin-bottom: 20px;
     }
-    [id^="logseq-plugin-block-calendar--block-calendar-yearly-slot"] .controls  {
+    [id^="logseq-block-calendar--block-calendar-yearly-slot"] .controls  {
       display: flex;
     }
-    [id^="logseq-plugin-block-calendar--block-calendar-yearly-slot"] .calendar-header-title  {
+    [id^="logseq-block-calendar--block-calendar-yearly-slot"] .calendar-header-title  {
       font-weight: bold;
       font-size: 1.5em;
       height: 60px;
     }
 
-    [id^="logseq-plugin-block-calendar--block-calendar-yearly-slot"] .logseq-block-calendar .calendar-title  {
+    [id^="logseq-block-calendar--block-calendar-yearly-slot"] .logseq-block-calendar .calendar-title  {
       font-weight: bold;
       font-size: 1em;
       height: 40px;
     }
 
-    [id^="logseq-plugin-block-calendar--block-calendar-yearly-slot"] .yearly-months {
+    [id^="logseq-block-calendar--block-calendar-yearly-slot"] .yearly-months {
        display: grid !important;
        grid-template-columns: repeat(${logseq.settings?.yearlyColumns || 3}, ${
       100 / (logseq.settings?.yearlyColumns || 3)
