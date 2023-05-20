@@ -14,12 +14,12 @@ export default {
   December: "Dezembro",
 
   // Weekday
-  Sunday: "Sol",
-  Monday: "Mon",
-  Tuesday: "Tues",
-  Wednesday: "Casamos",
-  Thursday: "Thu",
-  Friday: "Fri",
+  Sunday: "Dom",
+  Monday: "Seg",
+  Tuesday: "Ter",
+  Wednesday: "Qua",
+  Thursday: "Qui",
+  Friday: "Sex",
   Saturday: "Sáb",
 
   Today: "Hoje",
