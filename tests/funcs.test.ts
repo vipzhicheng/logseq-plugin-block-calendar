@@ -67,21 +67,46 @@ describe("Given the setCal function", () => {
   });
 
   describe.each(testCases)("When it receives the year $year and month $monthIndex", ({ year, monthIndex }) => {
+    let calendarPromise: Promise<string>;
+
+    beforeEach(() => {
+      calendarPromise = setCal(year, monthIndex, TEST_SLOT, TEST_LOCALE, []);
+    });
+
     it("should return a calendar object", async () => {
-      await expect(setCal(year, monthIndex, TEST_SLOT, TEST_LOCALE, [])).resolves.toMatchSnapshot();
+      await expect(calendarPromise).resolves.toMatchSnapshot();
     });
 
     if (monthIndex === 1) {
-      it("should return a calendar object with the correct amount of days for February", async () => {
-        const cal = await setCal(year, monthIndex, TEST_SLOT, TEST_LOCALE, []);
-        if (year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0)) {
-          expect(cal).toContain("29th February");
-        } else {
-          expect(cal).not.toContain("29th February");
-        }
+      if (year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0)) {
+        it("should return a calendar object with the 29th day for February in a leap year", async () => {
+          await expect(calendarPromise).resolves.toContain("29th February");
+        });
+      } else {
+        it("should not have a 29th day in the calendar for February in a non-leap year", async () => {
+          await expect(calendarPromise).resolves.not.toContain("29th February")
+        })
+      }
+
+      it("should not have a 30th day in the calendar", async () => {
+        await expect(calendarPromise).resolves.not.toContain("30th February");
+      });
+
+      it("should not have a 31st day in the calendar", async () => {
+        await expect(calendarPromise).resolves.not.toContain("31st February");
+      });
+
+    } else if ([0, 2, 4, 6, 7, 9, 11].includes(monthIndex)) {
+      it("should return a calendar object with the correct amount of days for months with 31 days", async () => {
+        const monthName = new Date(year, monthIndex, 1).toLocaleString(TEST_LOCALE, { month: "long" });
+        await expect(calendarPromise).resolves.toContain(`31st ${monthName}`);
+      })
+    } else {
+      it("should return a calendar object with the correct amount of days for months with 30 days", async () => {
+        const monthName = new Date(year, monthIndex, 1).toLocaleString(TEST_LOCALE, { month: "long" });
+        await expect(calendarPromise).resolves.toContain(`30th ${monthName}`);
       })
     }
-
   });
   /*
   export async function setCal(
