@@ -108,13 +108,4 @@ describe("Given the setCal function", () => {
       })
     }
   });
-  /*
-  export async function setCal(
-year4: number,
-month0: number,
-slot: string,
-language: string = "",
-options: string[] = []
-) {
-*/
 });
