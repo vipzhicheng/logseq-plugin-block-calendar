@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v0.2.9
+
+- fix: Fixed issue with leap years
+- fix: Corrected weekday translations for European Portuguese.
+
 ## v0.2.8
 
 - fix: adjust settings ui
