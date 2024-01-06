@@ -550,7 +550,8 @@ export function provideStyle(opts: any = {}) {
     [id^="logseq-plugin-block-calendar--block-calendar-yearly-slot"] .logseq-block-calendar:not(:nth-child(${
       logseq.settings?.yearlyColumns || 3
     }n)) {
-      border-right: 1px solid #eee;
+      border-right: 1px solid;
+      border-color: var(--ls-guideline-color);
     }
 
     [id^="logseq-plugin-block-calendar--block-calendar-yearly-slot"] .header .inline-button  {
@@ -637,7 +638,7 @@ export function provideStyle(opts: any = {}) {
 
     .logseq-block-calendar .calendar-day-today {
       font-weight: bold;
-      background-color: #eee;
+      background-color: var(--ls-quaternary-background-color);
       color: var(--ls-link-text-color);
     }
 
