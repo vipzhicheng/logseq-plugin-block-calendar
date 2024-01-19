@@ -8,36 +8,9 @@ dayjs.extend(isToday);
 
 import getLangFunc from "../lang";
 
+
 export function print(msg: string) {
   console.info(`#${logseq.baseInfo.id}: ${msg}`);
-}
-
-function leapYear(year: number) {
-  if (year % 4 == 0)
-    // basic rule
-    return true; // is leap year
-  /* else */ // else not needed when statement is "return"
-  return false; // is not leap year
-}
-
-function getDays(month: number, year: number) {
-  // create array to hold number of days in each month
-  const ar = new Array(12);
-  ar[0] = 31; // January
-  ar[1] = leapYear(year) ? 29 : 28; // February
-  ar[2] = 31; // March
-  ar[3] = 30; // April
-  ar[4] = 31; // May
-  ar[5] = 30; // June
-  ar[6] = 31; // July
-  ar[7] = 31; // August
-  ar[8] = 30; // September
-  ar[9] = 31; // October
-  ar[10] = 30; // November
-  ar[11] = 31; // December
-
-  // return number of days in the specified month (parameter)
-  return ar[month];
 }
 
 function getMonthName(month: number, lang: any) {
@@ -66,9 +39,9 @@ function isInteger(x: number | string) {
 }
 
 export function parseYearMonth(year: any, month: any, now: Date = new Date()) {
-  const year4 = isInteger(year) ? Number(year) : now?.getFullYear() || null;
-  const month0 = isInteger(month) ? Number(month) - 1 : now?.getMonth() || null;
-  return [year4, month0];
+  const year4 = isInteger(year) ? Number(year) : now?.getFullYear();
+  const month0 = isInteger(month) ? Number(month) - 1 : now?.getMonth();
+  return [year4 ?? null, month0 ?? null];
 }
 
 export function parseOptions(
@@ -134,7 +107,7 @@ export async function setCal(
   const firstDay = firstDayInstance.getDay();
 
   // number of days in current month
-  const days = getDays(month0, year4);
+  const days = dayjs(firstDayInstance).daysInMonth();
 
   // call function to draw calendar
   return await drawCal(
@@ -291,24 +264,20 @@ export async function drawCal(
 
       text += '<th COLSPAN=3 class="calendar-nav">'; // close header cell
 
-      text += `<a class="button inline-button no-padding-button" data-year="${previousMonthYear}" data-month="${
-        previousMonth + 1
-      }" data-slot="${slot}" data-language="${language}" data-options="${options.join(
-        " "
-      )}" data-on-click="loadCalendar" title="Jump to previous month."><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-left inline-block" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      text += `<a class="button inline-button no-padding-button" data-year="${previousMonthYear}" data-month="${previousMonth + 1
+        }" data-slot="${slot}" data-language="${language}" data-options="${options.join(
+          " "
+        )}" data-on-click="loadCalendar" title="Jump to previous month."><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-left inline-block" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
       <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
       <polyline points="15 6 9 12 15 18" />
-    </svg></a> <a class="button inline-button padding-button" data-year="${now.getFullYear()}" data-month="${
-        now.getMonth() + 1
-      }" data-slot="${slot}" data-language="${language}" data-options="${options.join(
-        " "
-      )}" data-on-click="loadCalendar" title="Jump back to current month.">${
-        lang.Today
-      }</a> <a class="button inline-button no-padding-button" data-year="${nextMonthYear}" data-month="${
-        nextMonth + 1
-      }" data-slot="${slot}" data-language="${language}" data-options="${options.join(
-        " "
-      )}" data-on-click="loadCalendar" title="Jump to next month"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-right inline-block" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    </svg></a> <a class="button inline-button padding-button" data-year="${now.getFullYear()}" data-month="${now.getMonth() + 1
+        }" data-slot="${slot}" data-language="${language}" data-options="${options.join(
+          " "
+        )}" data-on-click="loadCalendar" title="Jump back to current month.">${lang.Today
+        }</a> <a class="button inline-button no-padding-button" data-year="${nextMonthYear}" data-month="${nextMonth + 1
+        }" data-slot="${slot}" data-language="${language}" data-options="${options.join(
+          " "
+        )}" data-on-click="loadCalendar" title="Jump to next month"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-right inline-block" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
       <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
       <polyline points="9 6 15 12 9 18" />
     </svg></a>`;
@@ -375,8 +344,8 @@ export async function drawCal(
         (firstDayOfWeek === "sunday"
           ? firstDay
           : firstDay - 1 > 0
-          ? firstDay - 1
-          : 7)
+            ? firstDay - 1
+            : 7)
       ) {
         text += `<td></td>`;
         curCell++;
@@ -417,14 +386,13 @@ export async function drawCal(
         }
         text +=
           "<td>" +
-          `<a class="calendar-day ${recordsClass} button inline-button ${dayClass}" data-type="day" data-value="${journalTitle}" data-on-click="processJump">${digit}${
-            hasJournal && !hasDoneTask && !hasUndoneTask
-              ? '<span class="dot-journal-without-task"></span>'
-              : hasJournal && hasUndoneTask
+          `<a class="calendar-day ${recordsClass} button inline-button ${dayClass}" data-type="day" data-value="${journalTitle}" data-on-click="processJump">${digit}${hasJournal && !hasDoneTask && !hasUndoneTask
+            ? '<span class="dot-journal-without-task"></span>'
+            : hasJournal && hasUndoneTask
               ? '<span class="dot-journal-with-task"></span><span class="dot-task-undone"></span>'
               : hasJournal && hasDoneTask
-              ? '<span class="dot-journal-with-task"></span><span class="dot-task-done"></span>'
-              : ""
+                ? '<span class="dot-journal-with-task"></span><span class="dot-task-done"></span>'
+                : ""
           }` +
           "</td>";
         digit++;
@@ -538,11 +506,11 @@ export function provideStyle(opts: any = {}) {
     });
   }
 
-  const {} = opts;
+  const { } = opts;
   logseq.provideStyle({
     key: "block-calendar",
     style: `
-    [id^="logseq-plugin-block-calendar--block-calendar-yearly-slot"]  {
+    [id^="logseq-block-calendar--block-calendar-yearly-slot"]  {
       display: flex;
       flex-direction: column;
     }
@@ -554,35 +522,34 @@ export function provideStyle(opts: any = {}) {
       border-color: var(--ls-guideline-color);
     }
 
-    [id^="logseq-plugin-block-calendar--block-calendar-yearly-slot"] .header .inline-button  {
+    [id^="logseq-block-calendar--block-calendar-yearly-slot"] .header .inline-button  {
       display: inline-block;
       height: 2.6rem;
     }
-    [id^="logseq-plugin-block-calendar--block-calendar-yearly-slot"] .header  {
+    [id^="logseq-block-calendar--block-calendar-yearly-slot"] .header  {
       display: flex;
       justify-content: space-between;
       margin-bottom: 20px;
     }
-    [id^="logseq-plugin-block-calendar--block-calendar-yearly-slot"] .controls  {
+    [id^="logseq-block-calendar--block-calendar-yearly-slot"] .controls  {
       display: flex;
     }
-    [id^="logseq-plugin-block-calendar--block-calendar-yearly-slot"] .calendar-header-title  {
+    [id^="logseq-block-calendar--block-calendar-yearly-slot"] .calendar-header-title  {
       font-weight: bold;
       font-size: 1.5em;
       height: 60px;
     }
 
-    [id^="logseq-plugin-block-calendar--block-calendar-yearly-slot"] .logseq-block-calendar .calendar-title  {
+    [id^="logseq-block-calendar--block-calendar-yearly-slot"] .logseq-block-calendar .calendar-title  {
       font-weight: bold;
       font-size: 1em;
       height: 40px;
     }
 
-    [id^="logseq-plugin-block-calendar--block-calendar-yearly-slot"] .yearly-months {
+    [id^="logseq-block-calendar--block-calendar-yearly-slot"] .yearly-months {
        display: grid !important;
-       grid-template-columns: repeat(${logseq.settings?.yearlyColumns || 3}, ${
-      100 / (logseq.settings?.yearlyColumns || 3)
-    }%);
+       grid-template-columns: repeat(${logseq.settings?.yearlyColumns || 3}, ${100 / (logseq.settings?.yearlyColumns || 3)
+      }%);
       gap: 10px;
     }
 
