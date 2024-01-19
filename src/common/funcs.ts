@@ -39,9 +39,9 @@ function isInteger(x: number | string) {
 }
 
 export function parseYearMonth(year: any, month: any, now: Date = new Date()) {
-  const year4 = isInteger(year) ? Number(year) : now?.getFullYear() || null;
-  const month0 = isInteger(month) ? Number(month) - 1 : now?.getMonth() || null;
-  return [year4, month0];
+  const year4 = isInteger(year) ? Number(year) : now?.getFullYear();
+  const month0 = isInteger(month) ? Number(month) - 1 : now?.getMonth();
+  return [year4 ?? null, month0 ?? null];
 }
 
 export function parseOptions(
