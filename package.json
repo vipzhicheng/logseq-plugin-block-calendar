@@ -5,7 +5,7 @@
   "main": "index.html",
   "scripts": {
     "dev": "vite dev",
-    "build": "vite build && cp icon.png package.json LICENSE dist/",
+    "build": "mkdir -p dist && vite build && cp icon.png package.json LICENSE dist/",
     "test": "jest"
   },
   "keywords": [],

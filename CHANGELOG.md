@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v0.2.10
+
+- fix: use theme colors instead of hardcoded, #38
+- fix: january bug, #37
+
 ## v0.2.9
 
 - fix: Fixed issue with leap years
