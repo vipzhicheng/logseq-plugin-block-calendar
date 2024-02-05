@@ -13,8 +13,10 @@ import ja from "./ja";
 import tr from "./tr";
 import it from "./it";
 import ko from "./ko";
+import fa from "./fa";
 
 const langs = {
+  fa,
   ko,
   it,
   tr,
@@ -38,6 +40,7 @@ export const englishLanguage = "English";
 const languageMapping: { [key: string]: string } = {
   [englishLanguage]: "en",
   Français: "fr",
+  فارسی: "fa",
   Deutsch: "de",
   简体中文: "zh-CN",
   繁體中文: "zh-Hant",
