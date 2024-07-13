@@ -108,14 +108,14 @@ const defineSettings= (): SettingSchemaDesc[] => [
   {
     key: "tableWidth",
     type: "string",
-    title: t("Calendar width"),
+    title: "",
     description: t("Set calendar width, default is 100%."),
     default: "100%",
   },
   {
     key: "journalDotColor",
     type: "string",
-    title: t("Journal dot color"),
+    title: "",
     description: t("Journal dot color"),
     default: "#0000ff",
     inputAs: "color",
@@ -123,7 +123,7 @@ const defineSettings= (): SettingSchemaDesc[] => [
   {
     key: "taskUndoneDotColor",
     type: "string",
-    title: t("Undone task dot color"),
+    title: "",
     description: t("Undone task dot color"),
     default: "#ff18ff",
     inputAs: "color",
@@ -131,7 +131,7 @@ const defineSettings= (): SettingSchemaDesc[] => [
   {
     key: "taskDoneDotColor",
     type: "string",
-    title: t("Done task dot color"),
+    title: "",
     description: t("Done task dot color"),
     default: "#03b803",
     inputAs: "color",
