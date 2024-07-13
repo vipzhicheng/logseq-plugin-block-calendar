@@ -538,9 +538,11 @@ const main = async () => {
     ".nav-contents-container"
   ) as HTMLElement
 
-  const navContentPlaceholder = top!.document.createElement("div")
-  navContentPlaceholder.id = "nav-sidebar-placeholder"
-  navContentEl.before(navContentPlaceholder)
+  if (!(top!.document.getElementById("nav-sidebar-placeholder"))) {
+    const navContentPlaceholder = top!.document.createElement("div")
+    navContentPlaceholder.id = "nav-sidebar-placeholder"
+    navContentEl.before(navContentPlaceholder)
+  }
 
   setTimeout(async () => {
     await renderAlwaysIn(logseq.settings?.alwaysRenderIn as string)
