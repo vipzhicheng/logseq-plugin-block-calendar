@@ -489,10 +489,13 @@ export function provideStyle(opts: any = {}) {
         :root {
           --ls-left-sidebar-width: 350px;
         }
-        #nav-sidebar-placeholder {
+        #left-sidebar #nav-sidebar-placeholder {
           padding: 1rem;
           border-top: 1px solid #eee;
           border-bottom: 1px solid #eee;
+        }
+        #left-sidebar #block-calendar-widget_placeholder table.logseq-block-calendar {
+          background-color: var(--left-sidebar-bg-color);
         }
       `,
     });
@@ -624,6 +627,7 @@ export function provideStyle(opts: any = {}) {
     }
     .logseq-block-calendar .calendar-day-rec {
       position: relative;
+      white-space: nowrap;
     }
     .logseq-block-calendar .calendar-day-rec .dot-task-undone::after {
       content: "";
@@ -666,6 +670,9 @@ export function provideStyle(opts: any = {}) {
     }
     #right-sidebar-container #block-calendar-widget_placeholder {
       padding: 6px 16px 6px 12px;
+    }
+    #block-calendar-widget_placeholder {
+      max-width: 500px;
     }
     `,
   });
