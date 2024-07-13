@@ -62,7 +62,7 @@ const defineSettings= (): SettingSchemaDesc[] => [
   {
     key: "alwaysRenderLocation",
     type: "enum",
-    enumChoices: ["Left sidebar", "Right sidebar", "Custom", "Disabled"],
+    enumChoices: ["Left sidebar", "Left sidebar footer", "Right sidebar", "Custom", "Disabled"],
     title: t("Widget location"),
     description: t("Always render calendar in predefined or custom location."),
     default: "Disabled",
@@ -458,6 +458,8 @@ const main = async () => {
 
     if (logseq.settings?.alwaysRenderLocation === "Left sidebar") {
       containerSelector = "#nav-sidebar-placeholder"
+    } else if (logseq.settings?.alwaysRenderLocation === "Left sidebar footer") {
+      containerSelector = "footer.create"
     } else if (logseq.settings?.alwaysRenderLocation === "Right sidebar") {
       containerSelector = ".sidebar-item-list"
     }

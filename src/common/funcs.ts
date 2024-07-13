@@ -482,7 +482,7 @@ async function _getCurrentRepoRangeDoneTaskJournals(
 }
 
 export function provideStyle(opts: any = {}) {
-  if (logseq.settings?.alwaysRenderLocation === "Left sidebar") {
+  if (logseq.settings?.alwaysRenderLocation === "Left sidebar" || logseq.settings?.alwaysRenderLocation === "Left sidebar footer") {
     logseq.provideStyle({
       key: "block-calendar-left-sidebar",
       style: `
