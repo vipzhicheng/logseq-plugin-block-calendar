@@ -5,6 +5,7 @@
 - feat: Translation of plugin settings #42.
 - fix: JP translation. #42.
 - feat: Add Persian translation. #39.
+- feat: highlight selected journal day & adapt colors to radix ui #41
 
 ## v0.2.10
 
