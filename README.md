@@ -16,7 +16,7 @@ A plugin to render a calendar in block, so you can put it onto right side bar.
 * Show if journal page exist by showing a red dot.
 * Show if task exists and finished on journal day.
 * Support setting first day of week.
-* Supported languages: `en`, `fr`, `de`, `zh-CN`, `zh-Hant`, `af`, `es`, `nb-NO`, `pt-BR`, `pt-PT`, `ru`, `ja`, `it`, `tr`, `ko`.
+* Supported languages: `en`, `fr`,  `fa`, `de`, `zh-CN`, `zh-Hant`, `af`, `es`, `nb-NO`, `pt-BR`, `pt-PT`, `ru`, `ja`, `it`, `tr`, `ko`.
 
 ## Usage
 
