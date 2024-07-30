@@ -4,6 +4,7 @@
 
 - feat: Translation of plugin settings #42.
 - fix: JP translation. #42.
+- feat: Add Persian translation. #39.
 
 ## v0.2.10
 
