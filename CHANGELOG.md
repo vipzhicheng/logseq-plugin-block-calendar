@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v0.2.11
+
+- feat: Translation of plugin settings #42.
+- fix: JP translation. #42.
+
 ## v0.2.10
 
 - fix: use theme colors instead of hardcoded, #38
