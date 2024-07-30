@@ -7,6 +7,7 @@ import isToday from "dayjs/plugin/isToday";
 dayjs.extend(isToday);
 
 import getLangFunc from "../lang";
+import { t } from "logseq-l10n"
 
 
 export function print(msg: string) {
@@ -96,7 +97,7 @@ export async function setCal(
   options: string[] = []
 ) {
   clearCachedDays();
-  const getLang = getLangFunc(logseq.settings?.defaultLanguage);
+  const getLang = getLangFunc(logseq.settings?.defaultLanguage as any);
   const lang = getLang(language);
 
   const now = new Date();
@@ -267,17 +268,17 @@ export async function drawCal(
       text += `<a class="button inline-button no-padding-button" data-year="${previousMonthYear}" data-month="${previousMonth + 1
         }" data-slot="${slot}" data-language="${language}" data-options="${options.join(
           " "
-        )}" data-on-click="loadCalendar" title="Jump to previous month."><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-left inline-block" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        )}" data-on-click="loadCalendar" title="${t("Jump to previous month.")}"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-left inline-block" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
       <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
       <polyline points="15 6 9 12 15 18" />
     </svg></a> <a class="button inline-button padding-button" data-year="${now.getFullYear()}" data-month="${now.getMonth() + 1
         }" data-slot="${slot}" data-language="${language}" data-options="${options.join(
           " "
-        )}" data-on-click="loadCalendar" title="Jump back to current month.">${lang.Today
+        )}" data-on-click="loadCalendar" title="${t("Jump back to current month.")}">${lang.Today
         }</a> <a class="button inline-button no-padding-button" data-year="${nextMonthYear}" data-month="${nextMonth + 1
         }" data-slot="${slot}" data-language="${language}" data-options="${options.join(
           " "
-        )}" data-on-click="loadCalendar" title="Jump to next month"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-right inline-block" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        )}" data-on-click="loadCalendar" title="${t("Jump to next month")}"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-right inline-block" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
       <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
       <polyline points="9 6 15 12 9 18" />
     </svg></a>`;
@@ -488,10 +489,22 @@ export function provideStyle(opts: any = {}) {
         :root {
           --ls-left-sidebar-width: 350px;
         }
-        #nav-sidebar-placeholder {
+        #left-sidebar #nav-sidebar-placeholder {
           padding: 1rem;
           border-top: 1px solid #eee;
           border-bottom: 1px solid #eee;
+        }
+        #left-sidebar #block-calendar-widget_placeholder table.logseq-block-calendar {
+          background-color: var(--left-sidebar-bg-color);
+        }
+      `,
+    })
+  } else if (logseq.settings?.alwaysRenderLocation === "Left sidebar footer") {
+    logseq.provideStyle({
+      key: "block-calendar-left-sidebar",
+      style: `
+        #left-sidebar #block-calendar-widget_placeholder table.logseq-block-calendar {
+          background-color: var(--left-sidebar-bg-color);
         }
       `,
     });
@@ -548,7 +561,7 @@ export function provideStyle(opts: any = {}) {
 
     [id^="logseq-block-calendar--block-calendar-yearly-slot"] .yearly-months {
        display: grid !important;
-       grid-template-columns: repeat(${logseq.settings?.yearlyColumns || 3}, ${100 / (logseq.settings?.yearlyColumns || 3)
+       grid-template-columns: repeat(${logseq.settings?.yearlyColumns as number || 3}, ${100 / (logseq.settings?.yearlyColumns as number || 3)
       }%);
       gap: 10px;
     }
@@ -623,6 +636,7 @@ export function provideStyle(opts: any = {}) {
     }
     .logseq-block-calendar .calendar-day-rec {
       position: relative;
+      white-space: nowrap;
     }
     .logseq-block-calendar .calendar-day-rec .dot-task-undone::after {
       content: "";
@@ -665,6 +679,9 @@ export function provideStyle(opts: any = {}) {
     }
     #right-sidebar-container #block-calendar-widget_placeholder {
       padding: 6px 16px 6px 12px;
+    }
+    #block-calendar-widget_placeholder {
+      max-width: 500px;
     }
     `,
   });

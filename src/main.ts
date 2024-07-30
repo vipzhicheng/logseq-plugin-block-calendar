@@ -12,28 +12,48 @@ import {
 } from "./common/funcs";
 import getLangFunc from "./lang";
 import { englishLanguage, availableLanguages, Lang } from "./lang";
+import { setup as l10nSetup, t } from "logseq-l10n" //https://github.com/sethyuan/logseq-l10n
+import ja from "./translations/ja.json"
+import af from "./translations/af.json"
+import de from "./translations/de.json"
+import es from "./translations/es.json"
+import fr from "./translations/fr.json"
+import id from "./translations/id.json"
+import it from "./translations/it.json"
+import ko from "./translations/ko.json"
+import nbNO from "./translations/nb-NO.json"
+import nl from "./translations/nl.json"
+import pl from "./translations/pl.json"
+import ptBR from "./translations/pt-BR.json"
+import ptPT from "./translations/pt-PT.json"
+import ru from "./translations/ru.json"
+import sk from "./translations/sk.json"
+import tr from "./translations/tr.json"
+import uk from "./translations/uk.json"
+import zhCN from "./translations/zh-CN.json"
+import zhHant from "./translations/zh-Hant.json"
 
-const defineSettings: SettingSchemaDesc[] = [
+const defineSettings= (): SettingSchemaDesc[] => [
   // @ts-ignore
   {
     key: "settings",
-    title: "Settings",
+    title: t("Settings"),
     type: "heading",
   },
   {
     key: "enableDot",
     type: "boolean",
-    title: "Enable dot",
+    title: t("Enable dot"),
     description:
-      "Enable red dot, to show whether or not journal exists on that day. Need reload to take effect.",
+      t("Enable red dot, to show whether or not journal exists on that day. Need reload to take effect."),
     default: true,
   },
   {
     key: "firstDayOfWeek",
     type: "enum",
-    title: "First day of week",
+    title: t("First day of week"),
     description:
-      "Which day is the first day of your week? Need to trigger rerender manually to take effect.",
+      t("Which day is the first day of your week? Need to trigger rerender manually to take effect."),
     enumChoices: ["monday", "sunday"],
     enumPicker: "radio",
     default: "sunday",
@@ -42,17 +62,17 @@ const defineSettings: SettingSchemaDesc[] = [
   {
     key: "alwaysRenderLocation",
     type: "enum",
-    enumChoices: ["Left sidebar", "Right sidebar", "Custom", "Disabled"],
-    title: "Widget location",
-    description: "Always render calendar in predefined or custom location.",
+    enumChoices: ["Left sidebar", "Left sidebar footer", "Right sidebar", "Custom", "Disabled"],
+    title: t("Widget location"),
+    description: t("Always render calendar in predefined or custom location."),
     default: "Disabled",
   },
   {
     key: "alwaysRenderIn",
     type: "string",
-    title: "use .sidebar-item-list to locate the right sidebar",
+    title: t("use .sidebar-item-list to locate the right sidebar"),
     description:
-      "Provide CSS selector: ID or class. Only works when alwaysRenderLocation = Custom",
+      t("Provide CSS selector: ID or class. Only works when alwaysRenderLocation = Custom"),
     default: ".sidebar-item-list",
   },
   {
@@ -60,20 +80,20 @@ const defineSettings: SettingSchemaDesc[] = [
     type: "enum",
     enumChoices: ["2", "3", "4"],
     title: "",
-    description: "Choose how many columns in yearly view",
+    description: t("Choose how many columns in yearly view"),
     default: "3",
   },
 
   // @ts-ignore
   {
     key: "language",
-    title: "Language",
+    title: t("Language"),
     type: "heading",
   },
   {
     key: "defaultLanguage",
     type: "enum",
-    title: "Language locale",
+    title: t("Language locale"),
     enumChoices: availableLanguages,
     description: "",
     default: englishLanguage,
@@ -82,52 +102,47 @@ const defineSettings: SettingSchemaDesc[] = [
   // @ts-ignore
   {
     key: "theme",
-    title: "Look and feel",
+    title: t("Look and feel"),
     type: "heading",
   },
   {
     key: "tableWidth",
     type: "string",
-    title: "Calendar width",
-    description: "Set calendar width, default is 100%.",
+    title: "",
+    description: t("Set calendar width, default is 100%."),
     default: "100%",
   },
   {
     key: "journalDotColor",
     type: "string",
-    title: "Journal dot color",
-    description: "Journal dot color",
+    title: "",
+    description: t("Journal dot color"),
     default: "#0000ff",
     inputAs: "color",
   },
   {
     key: "taskUndoneDotColor",
     type: "string",
-    title: "Undone task dot color",
-    description: "Undone task dot color",
+    title: "",
+    description: t("Undone task dot color"),
     default: "#ff18ff",
     inputAs: "color",
   },
   {
     key: "taskDoneDotColor",
     type: "string",
-    title: "Done task dot color",
-    description: "Done task dot color",
+    title: "",
+    description: t("Done task dot color"),
     default: "#03b803",
     inputAs: "color",
   },
-];
+]
 
-logseq.useSettingsSchema(defineSettings);
-logseq.onSettingsChanged(() => {
-  provideStyle();
-});
+const calendarKeyPrefix = "block-calendar-"
 
-const calendarKeyPrefix = "block-calendar-";
-
-const calendarWidgetSlot = "widget";
-const calendarWidgetKey = calendarKeyPrefix + calendarWidgetSlot;
-const calendarWidgetPlaceholder = `#${calendarWidgetKey}_placeholder`;
+const calendarWidgetSlot = "widget"
+const calendarWidgetKey = calendarKeyPrefix + calendarWidgetSlot
+const calendarWidgetPlaceholder = `#${calendarWidgetKey}_placeholder`
 
 const leftArrowIcon = `
   <svg xmlns="http://www.w3.org/2000/svg"
@@ -139,7 +154,7 @@ const leftArrowIcon = `
     <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
     <polyline points="15 6 9 12 15 18" />
   </svg>
-`.trim();
+`.trim()
 
 const rightArrowIcon = `
   <svg xmlns="http://www.w3.org/2000/svg"
@@ -151,7 +166,7 @@ const rightArrowIcon = `
     <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
     <polyline points="9 6 15 12 9 18" />
   </svg>
-`.trim();
+`.trim()
 
 const editIcon = `
   <svg xmlns="http://www.w3.org/2000/svg"
@@ -164,27 +179,27 @@ const editIcon = `
     <path d="M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4" />
     <line x1="13.5" y1="6.5" x2="17.5" y2="10.5" />
   </svg>
-`.trim();
+`.trim()
 
 function provideCalendarUI(calendar: string, slot: string) {
   if (!slot) {
-    throw new Error("Attemp to render without slot");
+    throw new Error("Attemp to render without slot")
   }
 
   const params: any = {
     reset: true,
     template: calendar,
-  };
-
-  if (slot === calendarWidgetSlot) {
-    params.key = calendarWidgetKey;
-    params.path = calendarWidgetPlaceholder;
-  } else {
-    params.key = calendarKeyPrefix + slot;
-    params.slot = slot;
   }
 
-  logseq.provideUI(params);
+  if (slot === calendarWidgetSlot) {
+    params.key = calendarWidgetKey
+    params.path = calendarWidgetPlaceholder
+  } else {
+    params.key = calendarKeyPrefix + slot
+    params.slot = slot
+  }
+
+  logseq.provideUI(params)
 }
 
 async function constructYearlyCalendar(
@@ -194,22 +209,22 @@ async function constructYearlyCalendar(
   lang: Lang,
   options: string[]
 ): Promise<string> {
-  const now = new Date();
-  const language = lang.label;
-  const optionsJoined = options.join(" ");
+  const now = new Date()
+  const language = lang.label
+  const optionsJoined = options.join(" ")
 
-  let monthView = "";
+  let monthView = ""
   for (let month0 of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]) {
     const calendar = await setCal(year4, month0, slot, lang.label, [
       "nonav",
       "noyear",
-    ]);
-    monthView += calendar;
+    ])
+    monthView += calendar
   }
 
-  let header = null;
+  let header = null
   if (options.includes("nohead")) {
-    header = "";
+    header = ""
   } else {
     header = `
       <div class="header">
@@ -219,12 +234,12 @@ async function constructYearlyCalendar(
              data-uuid="${uuid}"
              data-on-click="editBlock"
             >${editIcon}</a>
-    `.trim();
+    `.trim()
 
     if (!options.includes("nonav")) {
       header += `
         <a class="button inline-button no-padding-button"
-           title="Jump to previous year."
+           title="${t("Jump to previous year.")}"
            data-on-click="loadCalendarYearly"
            data-year="${year4 - 1}"
            data-language="${language}"
@@ -234,7 +249,7 @@ async function constructYearlyCalendar(
           >${leftArrowIcon}</a>
 
         <a class="button inline-button padding-button"
-           title="Jump back to current year."
+           title="${t("Jump back to current year.")}"
            data-on-click="loadCalendarYearly"
            data-year="${now.getFullYear()}"
            data-language="${language}"
@@ -244,7 +259,7 @@ async function constructYearlyCalendar(
           >${lang.Today}</a>
 
         <a class="button inline-button no-padding-button"
-           title="Jump to next year"
+           title="${t("Jump to next year")}"
            data-on-click="loadCalendarYearly"
            data-year="${year4 + 1}"
            data-language="${language}"
@@ -253,13 +268,13 @@ async function constructYearlyCalendar(
            data-options="${optionsJoined}"
           >${rightArrowIcon}</a>
 
-     `.trim();
+     `.trim()
     }
 
-    header += "</div></div>";
+    header += "</div></div>"
   }
 
-  return header + `<div class="yearly-months">${monthView}</div>`;
+  return header + `<div class="yearly-months">${monthView}</div>`
 }
 
 function provideYearlyCalendarUI(calendar: string, slot: string) {
@@ -268,72 +283,87 @@ function provideYearlyCalendarUI(calendar: string, slot: string) {
     slot: slot,
     reset: true,
     template: calendar,
-  });
+  })
 }
 
 const main = async () => {
-  logseq.App.onGraphAfterIndexed(() => {
-    clearCachedDays();
-  });
-  logseq.App.onCurrentGraphChanged(() => {
-    clearCachedDays();
-  });
 
-  const getLang = getLangFunc(logseq.settings?.defaultLanguage);
+  // L10n
+  await l10nSetup({
+    builtinTranslations: {//Full translations
+        ja, af, de, es, fr, id, it, ko, "nb-NO": nbNO, nl, pl, "pt-BR": ptBR, "pt-PT": ptPT, ru, sk, tr, uk, "zh-CN": zhCN, "zh-Hant": zhHant
+    }
+  })
+
+  
+  logseq.useSettingsSchema(defineSettings())
+  logseq.onSettingsChanged(() => {
+    provideStyle()
+  })
+
+
+  logseq.App.onGraphAfterIndexed(() => {
+    clearCachedDays()
+  })
+  logseq.App.onCurrentGraphChanged(() => {
+    clearCachedDays()
+  })
+
+  const getLang = getLangFunc(logseq.settings?.defaultLanguage as any)
 
   logseq.Editor.registerSlashCommand("Insert Block Calendar", async () => {
-    await logseq.Editor.insertAtEditingCursor("{{renderer block-calendar}}");
-  });
+    await logseq.Editor.insertAtEditingCursor("{{renderer block-calendar}}")
+  })
 
   logseq.Editor.registerSlashCommand(
     "Insert Block Yearly Calendar",
     async () => {
       await logseq.Editor.insertAtEditingCursor(
         "{{renderer block-calendar-yearly}}"
-      );
+      )
     }
-  );
+  )
 
   logseq.provideModel({
     async editBlock(e: any) {
-      const { uuid } = e.dataset;
-      await logseq.Editor.editBlock(uuid);
+      const { uuid } = e.dataset
+      await logseq.Editor.editBlock(uuid)
     },
 
     async processJump(e: any) {
-      const { type, value } = e.dataset;
+      const { type, value } = e.dataset
       if (type === "day") {
         if (
           top?.document.body?.dataset?.activeKeystroke === "Shift" ||
           (top?.document.body?.dataset?.activeKeystroke &&
             top?.document.body?.dataset?.activeKeystroke?.indexOf("Shift") > -1)
         ) {
-          const page = await logseq.Editor.getPage(value);
+          const page = await logseq.Editor.getPage(value)
           if (page) {
-            logseq.Editor.openInRightSidebar(page.uuid);
+            logseq.Editor.openInRightSidebar(page.uuid)
           }
         } else if (
           top?.document.body?.dataset?.activeKeystroke === "Meta" ||
           (top?.document.body?.dataset?.activeKeystroke &&
             top?.document.body?.dataset?.activeKeystroke?.indexOf("Meta") > -1)
         ) {
-          copyToClipboard(value);
+          copyToClipboard(value)
           // logseq.UI.showMsg(`Date ${value} has been copied to clipboard!`);
         } else {
           logseq.App.pushState("page", {
             name: value,
-          });
+          })
         }
       }
     },
 
     async loadCalendar(e: any) {
-      const { year, month, slot, language, options } = e.dataset;
+      const { year, month, slot, language, options } = e.dataset
 
-      const [year4, month0] = parseYearMonth(year, month);
+      const [year4, month0] = parseYearMonth(year, month)
 
       if (year4 === null || month0 === null) {
-        return;
+        return
       }
       const calendar = await setCal(
         year4,
@@ -341,19 +371,19 @@ const main = async () => {
         slot,
         language,
         parseOptions(options)
-      );
-      provideCalendarUI(calendar, slot);
+      )
+      provideCalendarUI(calendar, slot)
     },
 
     async loadCalendarYearly(e: any) {
-      let { year, slot, language, uuid, options } = e.dataset;
+      let { year, slot, language, uuid, options } = e.dataset
 
-      const [year4, _] = parseYearMonth(year, null, new Date());
-      const lang = getLang(language);
-      options = parseOptions(options);
+      const [year4, _] = parseYearMonth(year, null, new Date())
+      const lang = getLang(language)
+      options = parseOptions(options)
 
       if (year4 === null) {
-        return;
+        return
       }
 
       const calendar = await constructYearlyCalendar(
@@ -362,40 +392,40 @@ const main = async () => {
         year4,
         lang,
         options
-      );
-      provideYearlyCalendarUI(calendar, slot);
+      )
+      provideYearlyCalendarUI(calendar, slot)
     },
-  });
+  })
 
   logseq.App.onMacroRendererSlotted(async ({ slot, payload }) => {
-    let [type] = payload.arguments;
-    const uuid = payload.uuid;
+    let [type] = payload.arguments
+    const uuid = payload.uuid
 
     if (type === "block-calendar") {
-      let [_, year, month, language, ...options] = payload.arguments;
+      let [_, year, month, language, ...options] = payload.arguments
 
-      const [year4, month0] = parseYearMonth(year, month, new Date());
-      options = parseOptions(options);
+      const [year4, month0] = parseYearMonth(year, month, new Date())
+      options = parseOptions(options)
 
       if (year4 === null || month0 === null) {
-        return;
+        return
       }
-      const calendar = await setCal(year4, month0, slot, language, options);
-      provideCalendarUI(calendar, slot);
+      const calendar = await setCal(year4, month0, slot, language, options)
+      provideCalendarUI(calendar, slot)
     } else if (type === "block-calendar-yearly") {
-      let [_, year, language, ...options] = payload.arguments;
+      let [_, year, language, ...options] = payload.arguments
 
-      const [year4, __] = parseYearMonth(year, null, new Date());
+      const [year4, __] = parseYearMonth(year, null, new Date())
 
       if (language?.indexOf("nonav") > -1 || language?.indexOf("nohead") > -1) {
-        options.push(language);
-        language = ""; // decide by settings.
+        options.push(language)
+        language = "" // decide by settings.
       }
-      const lang = getLang(language);
-      options = parseOptions(options);
+      const lang = getLang(language)
+      options = parseOptions(options)
 
       if (year4 === null) {
-        return;
+        return
       }
       const calendar = await constructYearlyCalendar(
         uuid,
@@ -403,10 +433,10 @@ const main = async () => {
         year4,
         lang,
         options
-      );
-      provideYearlyCalendarUI(calendar, slot);
+      )
+      provideYearlyCalendarUI(calendar, slot)
     }
-  });
+  })
 
   const renderAlwaysIn = async (
     containerSelector: string,
@@ -414,81 +444,83 @@ const main = async () => {
   ) => {
     let widgetPlaceholder = top?.document.querySelector(
       `${calendarWidgetPlaceholder}`
-    ) as HTMLElement;
+    ) as HTMLElement
 
     const remove = (widgetPlaceholder: any) => {
       if (!widgetPlaceholder) {
-        return;
+        return
       }
 
-      widgetPlaceholder.style.display = "none";
-      widgetPlaceholder.remove();
-      widgetPlaceholder = null;
-    };
+      widgetPlaceholder.style.display = "none"
+      widgetPlaceholder.remove()
+      widgetPlaceholder = null
+    }
 
     if (logseq.settings?.alwaysRenderLocation === "Left sidebar") {
-      containerSelector = "#nav-sidebar-placeholder";
+      containerSelector = "#nav-sidebar-placeholder"
+    } else if (logseq.settings?.alwaysRenderLocation === "Left sidebar footer") {
+      containerSelector = "footer.create"
     } else if (logseq.settings?.alwaysRenderLocation === "Right sidebar") {
-      containerSelector = ".sidebar-item-list";
+      containerSelector = ".sidebar-item-list"
     }
 
     if (
       !containerSelector ||
       logseq.settings?.alwaysRenderLocation === "Disabled"
     ) {
-      remove(widgetPlaceholder);
-      print("Remove calendar widget");
-      return;
+      remove(widgetPlaceholder)
+      print("Remove calendar widget")
+      return
     }
 
     const container = top?.document.querySelector(
       containerSelector
-    ) as HTMLElement;
+    ) as HTMLElement
     if (!container) {
-      remove(widgetPlaceholder);
-      print("Remove calendar widget");
-      return;
+      remove(widgetPlaceholder)
+      print("Remove calendar widget")
+      return
     }
 
     if (!widgetPlaceholder || recreate) {
       if (widgetPlaceholder) {
-        remove(widgetPlaceholder);
-        print("Refresh calendar widget");
+        remove(widgetPlaceholder)
+        print("Refresh calendar widget")
       } else {
-        print("Create calendar widget");
+        print("Create calendar widget")
       }
 
-      widgetPlaceholder = top!.document.createElement("div");
-      widgetPlaceholder.id = calendarWidgetPlaceholder.slice(1);
-      container.insertAdjacentElement("afterbegin", widgetPlaceholder);
+      widgetPlaceholder = top!.document.createElement("div")
+      widgetPlaceholder.id = calendarWidgetPlaceholder.slice(1)
+      container.insertAdjacentElement("afterbegin", widgetPlaceholder)
     }
-    widgetPlaceholder.style.display = "block";
+    widgetPlaceholder.style.display = "block"
 
     // get widget "<" button
     const state = widgetPlaceholder.querySelector(
       ".calendar-nav > a"
-    ) as HTMLElement;
+    ) as HTMLElement
 
-    let year = null;
-    let month = null;
+    let year = null
+    let month = null
     if (state) {
       // extract year & month from button
-      year = state.dataset.year;
-      month = state.dataset.month;
+      year = state.dataset.year
+      month = state.dataset.month
     }
 
-    let [year4, month0] = parseYearMonth(year, month, new Date());
+    let [year4, month0] = parseYearMonth(year, month, new Date())
 
     if (year4 === null || month0 === null) {
-      return;
+      return
     }
 
     if (state) {
       // it is previous button → so we need to add one month
-      month0++;
+      month0++
       if (month0 === 12) {
-        year4++;
-        month0 = 0;
+        year4++
+        month0 = 0
       }
     }
 
@@ -496,65 +528,67 @@ const main = async () => {
       year4,
       month0,
       calendarWidgetSlot,
-      logseq.settings?.defaultLanguage,
+      logseq.settings?.defaultLanguage as any,
       []
-    );
-    provideCalendarUI(calendar, calendarWidgetSlot);
-  };
+    )
+    provideCalendarUI(calendar, calendarWidgetSlot)
+  }
 
   const navContentEl = top?.document.querySelector(
     ".nav-contents-container"
-  ) as HTMLElement;
+  ) as HTMLElement
 
-  const navContentPlaceholder = top!.document.createElement("div");
-  navContentPlaceholder.id = "nav-sidebar-placeholder";
-  navContentEl.before(navContentPlaceholder);
+  if (!(top!.document.getElementById("nav-sidebar-placeholder"))) {
+    const navContentPlaceholder = top!.document.createElement("div")
+    navContentPlaceholder.id = "nav-sidebar-placeholder"
+    navContentEl.before(navContentPlaceholder)
+  }
 
   setTimeout(async () => {
-    await renderAlwaysIn(logseq.settings?.alwaysRenderIn);
-  }, 1000);
+    await renderAlwaysIn(logseq.settings?.alwaysRenderIn as string)
+  }, 1000)
 
   logseq.App.onGraphAfterIndexed(() => {
     setTimeout(async () => {
-      await renderAlwaysIn(logseq.settings?.alwaysRenderIn);
-    }, 1000);
-  });
+      await renderAlwaysIn(logseq.settings?.alwaysRenderIn as string)
+    }, 1000)
+  })
 
   logseq.App.onCurrentGraphChanged(() => {
     setTimeout(async () => {
-      await renderAlwaysIn(logseq.settings?.alwaysRenderIn);
-    }, 1000);
-  });
+      await renderAlwaysIn(logseq.settings?.alwaysRenderIn as string)
+    }, 1000)
+  })
 
   logseq.App.onSidebarVisibleChanged(async (e) => {
     if (e.visible) {
-      await renderAlwaysIn(logseq.settings?.alwaysRenderIn);
+      await renderAlwaysIn(logseq.settings?.alwaysRenderIn as string)
     }
-  });
+  })
 
   logseq.onSettingsChanged(async (newSettings: any, oldSettings: any) => {
     if (
       newSettings.alwaysRenderLocation !== oldSettings.alwaysRenderLocation ||
       newSettings.alwaysRenderIn !== oldSettings.alwaysRenderIn
     ) {
-      await renderAlwaysIn(newSettings.alwaysRenderIn, true);
+      await renderAlwaysIn(newSettings.alwaysRenderIn as string, true)
     }
 
     if (newSettings.defaultLanguage !== oldSettings.defaultLanguage) {
-      await renderAlwaysIn(newSettings.alwaysRenderIn, true);
+      await renderAlwaysIn(newSettings.alwaysRenderIn as string, true)
     }
-  });
+  })
 
   logseq.DB.onChanged(async ({ blocks, txData, txMeta }) => {
     for (const block of blocks) {
       if (block.journalDay) {
-        await renderAlwaysIn(logseq.settings?.alwaysRenderIn);
-        return;
+        await renderAlwaysIn(logseq.settings?.alwaysRenderIn as string)
+        return
       }
     }
-  });
+  })
 
-  provideStyle();
-};
+  provideStyle()
+}
 
-logseq.ready().then(main).catch(console.error);
+logseq.ready().then(main).catch(console.error)
