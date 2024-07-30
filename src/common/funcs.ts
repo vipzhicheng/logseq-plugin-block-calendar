@@ -7,8 +7,7 @@ import isToday from "dayjs/plugin/isToday";
 dayjs.extend(isToday);
 
 import getLangFunc from "../lang";
-import { t } from "logseq-l10n"
-
+import { t } from "logseq-l10n";
 
 export function print(msg: string) {
   console.info(`#${logseq.baseInfo.id}: ${msg}`);
@@ -266,20 +265,30 @@ export async function drawCal(
 
       text += '<th COLSPAN=3 class="calendar-nav">'; // close header cell
 
-      text += `<a class="button inline-button no-padding-button" data-year="${previousMonthYear}" data-month="${previousMonth + 1
-        }" data-slot="${slot}" data-language="${language}" data-options="${options.join(
-          " "
-        )}" data-on-click="loadCalendar" title="${t("Jump to previous month.")}"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-left inline-block" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      text += `<a class="button inline-button no-padding-button" data-year="${previousMonthYear}" data-month="${
+        previousMonth + 1
+      }" data-slot="${slot}" data-language="${language}" data-options="${options.join(
+        " "
+      )}" data-on-click="loadCalendar" title="${t(
+        "Jump to previous month."
+      )}"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-left inline-block" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
       <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
       <polyline points="15 6 9 12 15 18" />
-    </svg></a> <a class="button inline-button padding-button" data-year="${now.getFullYear()}" data-month="${now.getMonth() + 1
-        }" data-slot="${slot}" data-language="${language}" data-options="${options.join(
-          " "
-        )}" data-on-click="loadCalendar" title="${t("Jump back to current month.")}">${lang.Today
-        }</a> <a class="button inline-button no-padding-button" data-year="${nextMonthYear}" data-month="${nextMonth + 1
-        }" data-slot="${slot}" data-language="${language}" data-options="${options.join(
-          " "
-        )}" data-on-click="loadCalendar" title="${t("Jump to next month")}"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-right inline-block" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    </svg></a> <a class="button inline-button padding-button" data-year="${now.getFullYear()}" data-month="${
+        now.getMonth() + 1
+      }" data-slot="${slot}" data-language="${language}" data-options="${options.join(
+        " "
+      )}" data-on-click="loadCalendar" title="${t(
+        "Jump back to current month."
+      )}">${
+        lang.Today
+      }</a> <a class="button inline-button no-padding-button" data-year="${nextMonthYear}" data-month="${
+        nextMonth + 1
+      }" data-slot="${slot}" data-language="${language}" data-options="${options.join(
+        " "
+      )}" data-on-click="loadCalendar" title="${t(
+        "Jump to next month"
+      )}"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-right inline-block" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
       <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
       <polyline points="9 6 15 12 9 18" />
     </svg></a>`;
@@ -346,8 +355,8 @@ export async function drawCal(
         (firstDayOfWeek === "sunday"
           ? firstDay
           : firstDay - 1 > 0
-            ? firstDay - 1
-            : 7)
+          ? firstDay - 1
+          : 7)
       ) {
         text += `<td></td>`;
         curCell++;
@@ -390,13 +399,14 @@ export async function drawCal(
           dayClass += " calendar-day-selected";
         text +=
           "<td>" +
-          `<a class="calendar-day ${recordsClass} button inline-button ${dayClass}" data-type="day" data-value="${journalTitle}" data-on-click="processJump">${digit}${hasJournal && !hasDoneTask && !hasUndoneTask
-            ? '<span class="dot-journal-without-task"></span>'
-            : hasJournal && hasUndoneTask
+          `<a class="calendar-day ${recordsClass} button inline-button ${dayClass}" data-type="day" data-value="${journalTitle}" data-on-click="processJump">${digit}${
+            hasJournal && !hasDoneTask && !hasUndoneTask
+              ? '<span class="dot-journal-without-task"></span>'
+              : hasJournal && hasUndoneTask
               ? '<span class="dot-journal-with-task"></span><span class="dot-task-undone"></span>'
               : hasJournal && hasDoneTask
-                ? '<span class="dot-journal-with-task"></span><span class="dot-task-done"></span>'
-                : ""
+              ? '<span class="dot-journal-with-task"></span><span class="dot-task-done"></span>'
+              : ""
           }` +
           "</td>";
         digit++;
@@ -501,7 +511,7 @@ export function provideStyle(opts: any = {}) {
           background-color: var(--left-sidebar-bg-color);
         }
       `,
-    })
+    });
   } else if (logseq.settings?.alwaysRenderLocation === "Left sidebar footer") {
     logseq.provideStyle({
       key: "block-calendar-left-sidebar",
@@ -522,7 +532,7 @@ export function provideStyle(opts: any = {}) {
     });
   }
 
-  const { } = opts;
+  const {} = opts;
   logseq.provideStyle({
     key: "block-calendar",
     style: `
@@ -564,8 +574,9 @@ export function provideStyle(opts: any = {}) {
 
     [id^="logseq-plugin-block-calendar--block-calendar-yearly-slot"] .yearly-months {
        display: grid !important;
-       grid-template-columns: repeat(${logseq.settings?.yearlyColumns as number || 3}, ${100 / (logseq.settings?.yearlyColumns as number || 3)
-      }%);
+       grid-template-columns: repeat(${
+         (logseq.settings?.yearlyColumns as number) || 3
+       }, ${100 / ((logseq.settings?.yearlyColumns as number) || 3)}%);
       gap: 10px;
     }
 
@@ -693,6 +704,10 @@ export function provideStyle(opts: any = {}) {
     }
     #right-sidebar-container #block-calendar-widget_placeholder {
       padding: 6px 16px 6px 12px;
+    }
+    footer #block-calendar-widget_placeholder {
+      border-top: 1px solid #eee;
+      margin-bottom: 5px;
     }
     #block-calendar-widget_placeholder {
       max-width: 500px;
