@@ -566,6 +566,10 @@ const main = async () => {
     }
   })
 
+  logseq.App.onRouteChanged(async () => {
+    await renderAlwaysIn(logseq.settings?.alwaysRenderIn);
+  });
+
   logseq.onSettingsChanged(async (newSettings: any, oldSettings: any) => {
     if (
       newSettings.alwaysRenderLocation !== oldSettings.alwaysRenderLocation ||

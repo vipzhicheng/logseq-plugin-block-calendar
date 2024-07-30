@@ -230,6 +230,7 @@ export async function drawCal(
   const now = new Date();
 
   const config = await logseq.App.getUserConfigs();
+  const currentPage = await logseq.Editor.getCurrentPage();
 
   const journalDays = await getJournalDays(year, month);
   const undoneTaskDays = await getUndoneTaskDays(year, month);
@@ -385,6 +386,8 @@ export async function drawCal(
         ) {
           dayClass = "calendar-day-today";
         }
+        if (currentPage && currentPage.originalName === journalTitle)
+          dayClass += " calendar-day-selected";
         text +=
           "<td>" +
           `<a class="calendar-day ${recordsClass} button inline-button ${dayClass}" data-type="day" data-value="${journalTitle}" data-on-click="processJump">${digit}${hasJournal && !hasDoneTask && !hasUndoneTask
@@ -523,7 +526,7 @@ export function provideStyle(opts: any = {}) {
   logseq.provideStyle({
     key: "block-calendar",
     style: `
-    [id^="logseq-block-calendar--block-calendar-yearly-slot"]  {
+    [id^="logseq-plugin-block-calendar--block-calendar-yearly-slot"]  {
       display: flex;
       flex-direction: column;
     }
@@ -532,34 +535,34 @@ export function provideStyle(opts: any = {}) {
       logseq.settings?.yearlyColumns || 3
     }n)) {
       border-right: 1px solid;
-      border-color: var(--ls-guideline-color);
+      border-color: var(--lx-gray-04-alpha,var(--ls-guideline-color,var(--rx-gray-04-alpha)));
     }
 
-    [id^="logseq-block-calendar--block-calendar-yearly-slot"] .header .inline-button  {
+    [id^="logseq-plugin-block-calendar--block-calendar-yearly-slot"] .header .inline-button  {
       display: inline-block;
       height: 2.6rem;
     }
-    [id^="logseq-block-calendar--block-calendar-yearly-slot"] .header  {
+    [id^="logseq-plugin-block-calendar--block-calendar-yearly-slot"] .header  {
       display: flex;
       justify-content: space-between;
       margin-bottom: 20px;
     }
-    [id^="logseq-block-calendar--block-calendar-yearly-slot"] .controls  {
+    [id^="logseq-plugin-block-calendar--block-calendar-yearly-slot"] .controls  {
       display: flex;
     }
-    [id^="logseq-block-calendar--block-calendar-yearly-slot"] .calendar-header-title  {
+    [id^="logseq-plugin-block-calendar--block-calendar-yearly-slot"] .calendar-header-title  {
       font-weight: bold;
       font-size: 1.5em;
       height: 60px;
     }
 
-    [id^="logseq-block-calendar--block-calendar-yearly-slot"] .logseq-block-calendar .calendar-title  {
+    [id^="logseq-plugin-block-calendar--block-calendar-yearly-slot"] .logseq-block-calendar .calendar-title  {
       font-weight: bold;
       font-size: 1em;
       height: 40px;
     }
 
-    [id^="logseq-block-calendar--block-calendar-yearly-slot"] .yearly-months {
+    [id^="logseq-plugin-block-calendar--block-calendar-yearly-slot"] .yearly-months {
        display: grid !important;
        grid-template-columns: repeat(${logseq.settings?.yearlyColumns as number || 3}, ${100 / (logseq.settings?.yearlyColumns as number || 3)
       }%);
@@ -613,13 +616,24 @@ export function provideStyle(opts: any = {}) {
     }
 
     .logseq-block-calendar a {
-      color: var(--ls-primary-text-color);
+      color: var(--lx-gray-12,var(--ls-primary-text-color,hsl(var(--foreground))));
+    }
+
+    .logseq-block-calendar .calendar-day:hover {
+      background-color: var(--lx-gray-04,var(--ls-tertiary-background-color,var(--rx-gray-04)));
     }
 
     .logseq-block-calendar .calendar-day-today {
       font-weight: bold;
-      background-color: var(--ls-quaternary-background-color);
-      color: var(--ls-link-text-color);
+      color: var(--lx-accent-11,var(--ls-link-text-color,hsl(var(--primary)/.8)));
+      background-color: transparent;
+    }
+    .logseq-block-calendar .calendar-day-today:hover {
+      background-color: var(--lx-gray-04,var(--ls-tertiary-background-color,var(--rx-gray-04)));
+    }
+
+    .logseq-block-calendar .calendar-day-selected {
+      background-color: var(--lx-gray-04,var(--ls-quaternary-background-color,var(--rx-gray-04)));
     }
 
     .logseq-block-calendar .calendar-day-past {
